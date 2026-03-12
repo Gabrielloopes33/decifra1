@@ -15,7 +15,8 @@ import { supabase } from '@/lib/supabase/client';
 import { Mandala } from '@/components/ui/Mandala';
 import { FATORES } from '@/constants/ipip';
 import type { FatorKey } from '@/constants/ipip';
-import { COLORS } from '@/constants/colors';
+  import { COLORS } from '@/constants/colors';
+  import { gerarPDF } from '@/utils/pdfGenerator';
 
 interface Resultado {
   id: string;
@@ -54,6 +55,7 @@ export default function TreinadoraClienteResultadoScreen() {
   const { id: clienteId } = params;
 
   const [loading, setLoading] = useState(true);
+  const [gerandoPDF, setGerandoPDF] = useState(false);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const [protocolos, setProtocolos] = useState<Protocolo[]>([]);
@@ -134,6 +136,32 @@ export default function TreinadoraClienteResultadoScreen() {
 
   const handleVoltar = () => {
     router.back();
+  };
+
+  const handleGerarPDF = async () => {
+    if (!cliente || !resultado) return;
+    
+    setGerandoPDF(true);
+    try {
+      await gerarPDF({
+        cliente: {
+          nome: cliente.nome,
+          email: cliente.email,
+        },
+        resultado: {
+          scores_fatores: resultado.scores_fatores,
+          scores_facetas: resultado.scores_facetas,
+        },
+        protocolos: protocolos,
+        dataTeste: new Date(cliente.created_at).toLocaleDateString('pt-BR'),
+        tipo: 'treinadora',
+      });
+    } catch (error: any) {
+      console.error('Erro ao gerar PDF:', error);
+      Alert.alert('Erro', 'Não foi possível gerar o PDF. Tente novamente.');
+    } finally {
+      setGerandoPDF(false);
+    }
   };
 
   if (loading) {
@@ -319,6 +347,22 @@ export default function TreinadoraClienteResultadoScreen() {
                 </Text>
               </View>
             )}
+          </View>
+
+          {/* Botão Gerar PDF */}
+          <View style={styles.section}>
+            <TouchableOpacity
+              style={[styles.botaoPDF, gerandoPDF && styles.botaoDisabled]}
+              onPress={handleGerarPDF}
+              disabled={gerandoPDF}
+              activeOpacity={0.8}
+            >
+              {gerandoPDF ? (
+                <ActivityIndicator size="small" color={COLORS.creamLight} />
+              ) : (
+                <Text style={styles.botaoPDFTexto}>📄 Baixar Relatório Completo PDF</Text>
+              )}
+            </TouchableOpacity>
           </View>
 
           <View style={styles.espacoFinal} />
@@ -618,5 +662,24 @@ const styles = StyleSheet.create({
   },
   espacoFinal: {
     height: 40,
+  },
+  botaoPDF: {
+    backgroundColor: COLORS.vinho || '#6B2D3A',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  botaoPDFTexto: {
+    color: COLORS.creamLight,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  botaoDisabled: {
+    opacity: 0.7,
   },
 });

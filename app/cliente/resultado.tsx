@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
   import { FATORES } from '@/constants/ipip';
   import type { FatorKey } from '@/constants/ipip';
   import { COLORS } from '@/constants/colors';
+  import { gerarPDF } from '@/utils/pdfGenerator';
 
   interface Resultado {
     id: string;
@@ -47,6 +48,7 @@ import { useEffect, useState } from 'react';
     const { clienteId, resultadoId } = params;
     
     const [loading, setLoading] = useState(true);
+    const [gerandoPDF, setGerandoPDF] = useState(false);
     const [resultado, setResultado] = useState<Resultado | null>(null);
     const [protocolos, setProtocolos] = useState<Protocolo[]>([]);
     const [codigoInfo, setCodigoInfo] = useState<CodigoInfo | null>(null);
@@ -132,6 +134,31 @@ import { useEffect, useState } from 'react';
     }
 
     const scoresFatores = resultado.scores_fatores;
+
+    const handleGerarPDF = async () => {
+      setGerandoPDF(true);
+      try {
+        await gerarPDF({
+          cliente: {
+            nome: codigoInfo?.codigo ? `Cliente ${codigoInfo.codigo}` : 'Cliente',
+          },
+          resultado: {
+            scores_fatores: resultado.scores_fatores,
+          },
+          protocolos: protocolos,
+          codigo: codigoInfo?.codigo,
+          dataTeste: codigoInfo?.teste_completado_em 
+            ? new Date(codigoInfo.teste_completado_em).toLocaleDateString('pt-BR')
+            : new Date().toLocaleDateString('pt-BR'),
+          tipo: 'cliente',
+        });
+      } catch (error: any) {
+        console.error('Erro ao gerar PDF:', error);
+        Alert.alert('Erro', 'Não foi possível gerar o PDF. Tente novamente.');
+      } finally {
+        setGerandoPDF(false);
+      }
+    };
 
     return (
       <LinearGradient colors={[...COLORS.gradient]} style={styles.container}>
@@ -232,8 +259,21 @@ import { useEffect, useState } from 'react';
               </Text>
             </View>
 
-            {/* Botão Voltar para Home */}
-            <View style={styles.botaoContainer}>
+            {/* Botões de Ação */}
+            <View style={styles.botoesContainer}>
+              <TouchableOpacity
+                style={[styles.botaoPDF, gerandoPDF && styles.botaoDisabled]}
+                onPress={handleGerarPDF}
+                disabled={gerandoPDF}
+                activeOpacity={0.8}
+              >
+                {gerandoPDF ? (
+                  <ActivityIndicator size="small" color={COLORS.creamLight} />
+                ) : (
+                  <Text style={styles.botaoPDFTexto}>📄 Baixar Resultado PDF</Text>
+                )}
+              </TouchableOpacity>
+              
               <TouchableOpacity
                 style={styles.botaoVoltar}
                 onPress={() => router.replace('/')}
@@ -427,9 +467,26 @@ import { useEffect, useState } from 'react';
     espacoFinal: {
       height: 40,
     },
-    botaoContainer: {
+    botoesContainer: {
       paddingHorizontal: 24,
       marginBottom: 24,
+      gap: 12,
+    },
+    botaoPDF: {
+      backgroundColor: COLORS.vinho || '#6B2D3A',
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    botaoPDFTexto: {
+      color: COLORS.creamLight,
+      fontSize: 16,
+      fontWeight: '600' as const,
     },
     botaoVoltar: {
       backgroundColor: COLORS.accent,
@@ -441,6 +498,9 @@ import { useEffect, useState } from 'react';
       color: COLORS.creamLight,
       fontSize: 16,
       fontWeight: '600' as const,
+    },
+    botaoDisabled: {
+      opacity: 0.7,
     },
     codigoInfoCard: {
       backgroundColor: COLORS.cardBg,
