@@ -1,0 +1,459 @@
+Kimi: Vou criar um escopo de MVP completo e detalhado, formatado para o Replit Agent entender 100% do projeto.
+
+---
+
+# DECIFRA - ESCOPO MVP COMPLETO
+## Documento para Replit Agent
+
+---
+
+## 1. VISÃO EXECUTIVA
+
+**O que é:** Aplicativo mobile de avaliação de personalidade Big Five (IPIP-NEO-120) para treinadoras comportamentais e suas clientes.
+
+**Propósito do MVP:** Permitir que treinadoras comprem créditos, gerem códigos, clientes respondam o teste de 120 questões, e ambos visualizem resultados com protocolos recomendados.
+
+**Diferencial:** Sistema inteligente de 90 protocolos que cruza as 30 facetas para recomendar planos de ação personalizados.
+
+**Públicos:** 
+- Treinadoras (login): gerenciam tudo no app
+- Clientes (código): fazem teste e veem resultado básico
+- Admin: visão geral (web, fora do MVP)
+
+---
+
+## 2. ARQUITETURA TÉCNICA MVP
+
+### Stack Definida
+```
+FRONTEND: React Native (Expo) - app mobile iOS/Android
+BACKEND: Supabase (PostgreSQL + Auth + Edge Functions)
+EMAIL: Resend (envio de códigos)
+BUILD: EAS Build (Expo Application Services)
+```
+
+### Por que essa stack
+- React Native = uma codebase, dois apps
+- Supabase = backend completo sem servidor próprio
+- Edge Functions = processa webhook Hotmart e cálculos
+- Expo = build fácil, preview no celular
+
+---
+
+## 3. ESTRUTURA DE DADOS (TABELAS SUPABASE)
+
+### 3.1 treinadoras
+```sql
+id: uuid (primary key, from auth.users)
+nome: text (required)
+email: text (unique, required)
+telefone: text
+creditos_disponiveis: integer (default 0)
+status: text (ativo/inativo)
+created_at: timestamp
+```
+
+### 3.2 codigos
+```sql
+codigo: text (primary key, format: ART-XXXX)
+treinadora_id: uuid (foreign key → treinadoras)
+status: text (ativo/usado/expirado)
+usado_por: uuid (foreign key → clientes, nullable)
+created_at: timestamp
+expires_at: timestamp (default: now + 30 days)
+```
+
+### 3.3 clientes
+```sql
+id: uuid (primary key)
+nome: text (required)
+email: text (nullable)
+codigo_usado: text (foreign key → codigos)
+treinadora_id: uuid (foreign key → treinadoras)
+created_at: timestamp
+teste_completado: boolean (default false)
+```
+
+### 3.4 respostas
+```sql
+id: uuid (primary key)
+cliente_id: uuid (foreign key → clientes)
+item_numero: integer (1-120)
+resposta: integer (1-5)
+fator: text (N/E/O/A/C)
+faceta: integer (1-6)
+invertido: boolean
+created_at: timestamp
+```
+
+### 3.5 resultados
+```sql
+id: uuid (primary key)
+cliente_id: uuid (foreign key → clientes)
+tipo: text (fator/faceta)
+codigo: text (N, N1, E, E3, etc.)
+nome: text
+score_bruto: integer
+percentil: integer (5-95)
+classificacao: text (Muito Baixo/Baixo/Medio/Alto/Muito Alto)
+created_at: timestamp
+```
+
+### 3.6 protocolos
+```sql
+id: text (primary key, ex: N1-A, N1-B, N1-C)
+nome: text
+descricao: text
+objetivo: text
+exercicios: jsonb
+fator: text (N/E/O/A/C)
+faceta: integer (1-6)
+tipo: text (polo_alto/polo_baixo/ajuste_fino)
+```
+
+### 3.7 protocolos_recomendados
+```sql
+id: uuid (primary key)
+cliente_id: uuid (foreign key → clientes)
+protocolo_id: text (foreign key → protocolos)
+prioridade: integer (1-6)
+tipo_exibicao: text (cliente/treinadora)
+created_at: timestamp
+```
+
+---
+
+## 4. FLUXOS DO MVP
+
+### FLUXO A: TREINADORA (com login)
+
+```
+A1. LOGIN
+    └── Email + senha → Supabase Auth
+    └── Sucesso → Dashboard
+
+A2. DASHBOARD
+    └── Mostra: créditos disponíveis, clientes recentes, ações rápidas
+    └── Botões: [Gerar código] [Ver clientes] [Comprar créditos]
+
+A3. GERAR CÓDIGO
+    └── Form: nome da cliente (obrigatório), email (opcional)
+    └── Valida: tem créditos disponíveis?
+    └── Gera: código único ART-XXXX
+    └── Mostra: código + botão copiar + botão compartilhar
+    └── Decrementa: créditos da treinadora
+
+A4. LISTA DE CLIENTES
+    └── Mostra: todas as clientes da treinadora
+    └── Status: código ativo / teste em andamento / teste completo
+    └── Filtros: todas / ativas / completadas
+
+A5. RESULTADO COMPLETO (treinadora)
+    └── Acesso: quando cliente completou teste
+    └── Mostra: 
+        ├── Mandala dos 5 fatores (visual)
+        ├── Scores numéricos (percentis)
+        ├── 6 protocolos recomendados (3 principais + 2 compl. + 1 ajuste)
+        └── Botão: exportar PDF
+
+A6. PERFIL
+    └── Dados da treinadora
+    └── Botão: logout
+```
+
+### FLUXO B: CLIENTE (com código)
+
+```
+B1. ENTRADA POR CÓDIGO
+    └── Tela: "Descubra sua arquitetura emocional"
+    └── Input: código ART-XXXX
+    └── Valida: código existe? está ativo? não expirado?
+    └── Sucesso → Cadastro rápido
+
+B2. CADASTRO RÁPIDO
+    └── Campos: nome (obrigatório), email (opcional), idade (opcional)
+    └── Sucesso → Introdução ao teste
+
+B3. TESTE IPIP-NEO-120 (4 ESTAÇÕES)
+    └── Estação 1: "Como você pensa" (itens 1-30)
+    └── Estação 2: "Como você age" (itens 31-60)
+    └── Estação 3: "Como você conecta" (itens 61-90)
+    └── Estação 4: "Como você reage" (itens 91-120)
+    └── Cada item: escala 1-5 (Discordo totalmente → Concordo totalmente)
+    └── Persistência: salva a cada resposta (pode sair e voltar)
+
+B4. PROCESSANDO
+    └── Tela: "Decifrando seu perfil..."
+    └── Animação: mandala se formando
+    └── Background: calcula scores, gera resultados, recomenda protocolos
+
+B5. RESULTADO CLIENTE
+    └── Mostra:
+        ├── Mandala dos 5 fatores (sem números, só visual)
+        ├── Texto: "Quem você é" (interpretação do perfil)
+        ├── 4 protocolos (3 principais + 1 ajuste fino) - só nomes
+        └── Call-to-action: "Agende com sua treinadora"
+    └── NÃO mostra: percentis, scores, protocolos completos
+```
+
+### FLUXO C: INTEGRAÇÃO HOTMART (automático)
+
+```
+C1. WEBHOOK HOTMART
+    └── Endpoint: /webhook/hotmart
+    └── Recebe: dados da compra (product_id, buyer_email, etc.)
+    └── Verifica: email comprador = email treinadora cadastrada?
+    └── Se sim: adiciona créditos à treinadora
+    └── Envia: email com confirmação da compra
+
+C2. EDGE FUNCTION SUPABASE
+    └── Processa: webhook
+    └── Valida: assinatura do Hotmart
+    └── Atualiza: tabela treinadoras (creditos_disponiveis)
+    └── Insere: registro na tabela compras
+```
+
+---
+
+## 5. ALGORITMOS ESSENCIAIS
+
+### 5.1 Cálculo de Scores (após 120 respostas)
+
+```typescript
+// Passo 1: Inverter itens com direction "-"
+// resposta_invertida = 6 - resposta_original
+
+// Passo 2: Calcular score bruto por faceta (4 itens)
+// score_faceta = soma das 4 respostas (já invertidas)
+// range: 4-20
+
+// Passo 3: Calcular score bruto por fator (6 facetas = 24 itens)
+// score_fator = soma das 6 facetas
+// range: 24-120
+
+// Passo 4: Converter para percentil 5-95%
+// percentil_faceta = 5 + ((score - 4) / 16) * 90
+// percentil_fator = 5 + ((score - 24) / 96) * 90
+
+// Passo 5: Classificar em 5 faixas
+// Muito Baixo: 5-22%
+// Baixo: 23-39%
+// Medio: 40-56%
+// Alto: 57-73%
+// Muito Alto: 74-95%
+```
+
+### 5.2 Recomendação de Protocolos
+
+```typescript
+// Passo 1: Pontuar cada faceta
+// Muito Alto/Baixo = 3 pontos
+// Alto/Baixo = 2 pontos
+// Medio = 0 pontos
+
+// Passo 2: Bônus de segurança
+// Se N1, N5, ou N6 estiverem altos: +1 ponto
+
+// Passo 3: Verificar combinações críticas
+// Ex: N alto + C5 baixo → prioriza N6-A e C5-B
+
+// Passo 4: Ordenar por pontuação (maior primeiro)
+
+// Passo 5: Selecionar
+// Cliente: top 3 + 1 ajuste fino (4 total)
+// Treinadora: top 3 + 2 complementares + 1 ajuste (6 total)
+
+// Passo 6: Ordenar por prioridade temática
+// 1. Regulação/Estabilização (N)
+// 2. Execução/Consistência (C)
+// 3. Limites/Relação (A/E)
+// 4. Energia social (E)
+// 5. Visão/Criatividade (O)
+```
+
+---
+
+## 6. TELAS DO MVP (lista completa)
+
+### 6.1 Comuns
+| Tela | Descrição |
+|------|-----------|
+| Splash | Logo animado, transição para entrada |
+| Entrada | Escolha: sou cliente / sou treinadora |
+
+### 6.2 Fluxo Cliente
+| Tela | Descrição |
+|------|-----------|
+| Inserir Código | Input do código ART-XXXX |
+| Cadastro Rápido | Nome, email, idade |
+| Intro Estação 1 | Contexto "Como você pensa" |
+| Questão (template) | 120x, mesma estrutura |
+| Transição Estação | Pausa entre estações |
+| Intro Estação 2 | Contexto "Como você age" |
+| Intro Estação 3 | Contexto "Como você conecta" |
+| Intro Estação 4 | Contexto "Como você reage" |
+| Processando | Animação de cálculo |
+| Resultado Cliente | Mandala + 4 protocolos |
+
+### 6.3 Fluxo Treinadora
+| Tela | Descrição |
+|------|-----------|
+| Login | Email + senha |
+| Dashboard | Resumo, créditos, ações |
+| Gerar Código | Form + geração |
+| Lista de Clientes | Todas as clientes |
+| Resultado Completo | Mandala + scores + 6 protocolos |
+| Perfil | Dados + logout |
+
+---
+
+## 7. DADOS INICIAIS (seed)
+
+### 7.1 120 Itens do Teste
+- Lista completa fornecida em documento
+- Cada item: id, texto, fator, faceta, direction (+ ou -)
+- Ordem de apresentação: fixa (array de 120 posições)
+
+### 7.2 90 Protocolos
+- Estrutura: 3 por faceta (polo alto, polo baixo, ajuste fino)
+- IDs: N1-A, N1-B, N1-C, N2-A, ... C6-C
+- Conteúdo: nome, descrição, objetivo, exercícios (JSON)
+
+### 7.3 Textos Interpretativos
+- 25 textos de fatores (5 fatores × 5 faixas)
+- 60 textos de polos (30 facetas × 2 polos)
+- 30 descrições curtas das facetas
+
+---
+
+## 8. REGRAS DE NEGÓCIO
+
+### 8.1 Códigos
+- Formato: ART-XXXX (4 caracteres alfanuméricos maiúsculos)
+- Validade: 30 dias após geração
+- Uso: único, após uso vira "usado"
+- Custo: 1 crédito por código
+
+### 8.2 Créditos
+- Compra: fora do app (Hotmart), via web
+- Entrega: webhook automático adiciona à conta
+- Uso: geração de códigos consome 1 crédito cada
+
+### 8.3 Teste
+- Obrigatório: 120 respostas
+- Persistência: salva localmente (pode retomar)
+- Tempo mínimo: 8 minutos (alerta se menor)
+- Padrão suspeito: alerta se 100% iguais
+
+### 8.4 Resultados
+- Cliente: visual básico, sem números, 4 protocolos
+- Treinadora: completo, com números, 6 protocolos, exporta PDF
+
+---
+
+## 9. INTEGRAÇÕES EXTERNAS
+
+### 9.1 Supabase (principal)
+- Auth: login treinadoras
+- Database: todas as tabelas
+- Edge Functions: webhook Hotmart, cálculo de scores
+- Storage: PDFs exportados (opcional no MVP)
+
+### 9.2 Hotmart (webhook)
+- Evento: compra confirmada
+- Payload: dados do comprador, produto, valor
+- Ação: adicionar créditos à treinadora
+
+### 9.3 Resend (email)
+- Template: confirmação de compra
+- Template: código gerado (opcional, pode ser só no app)
+
+---
+
+## 10. CRONOGRAMA MVP (4 SEMANAS)
+
+### Semana 1: Fundação
+- Setup Expo + Supabase
+- Tabelas criadas
+- Auth treinadora funcionando
+- Tela de login + dashboard básico
+
+### Semana 2: Teste
+- 120 itens no banco
+- Interface das 4 estações
+- Persistência local das respostas
+- Cálculo de scores funcionando
+
+### Semana 3: Resultados
+- Algoritmo de recomendação de protocolos
+- Tela resultado cliente
+- Tela resultado treinadora
+- 90 protocolos cadastrados
+
+### Semana 4: Integração + Polish
+- Webhook Hotmart
+- Geração de códigos
+- Notificações
+- Ajustes de UX, testes, build
+
+---
+
+## 11. O QUE NÃO ESTÁ NO MVP (pós-MVP)
+
+| Feature | Motivo |
+|---------|--------|
+| Admin web completo | Foco no app mobile primeiro |
+| Notificações push | Email suficiente no MVP |
+| Comunidade de treinadoras | Escopo maior, precisa definição |
+| Evolução temporal (histórico) | Complexidade adicional |
+| White-label (cores da treinadora) | Customização avançada |
+| 20 protocolos "generalistas" | Não identificados ainda |
+| Offline completo (sem internet) | Persistência local é suficiente |
+
+---
+
+## 12. CHECKLIST DE ENTREGA MVP
+
+### Funcionalidades
+- [ ] Treinadora faz login
+- [ ] Treinadora compra créditos (Hotmart)
+- [ ] Treinadora gera código
+- [ ] Cliente insere código
+- [ ] Cliente faz teste 120 questões
+- [ ] Cliente vê resultado básico
+- [ ] Treinadora vê resultado completo
+- [ ] Treinadora exporta PDF
+
+### Dados
+- [ ] 120 itens cadastrados
+- [ ] 90 protocolos cadastrados
+- [ ] 25 textos de fatores
+- [ ] 60 textos de polos
+- [ ] 30 descrições de facetas
+
+### Técnicos
+- [ ] App roda em iOS
+- [ ] App roda em Android
+- [ ] Cálculo de scores correto
+- [ ] Recomendação de protocolos funcionando
+- [ ] Webhook Hotmart integrado
+
+---
+
+## 13. CONTATO E DÚVIDAS
+
+**Cliente:** Ártio (Isa Moreira)  
+**Desenvolvedor:** [Seu nome] - NexIA  
+**Stack:** React Native + Expo + Supabase  
+
+**Pendências para definir:**
+- 20 protocolos "generalistas" (Isa mencionou, não estão na lista de 90)
+- Labels dos 60 polos das facetas (para gráficos)
+- ID visual completo (cores, fontes além do ícone)
+- Contas Apple Developer e Google Play (em nome da Ártio)
+
+---
+
+Esse documento está pronto para ser colado no Replit Agent. Ele contém toda a informação estruturada necessária para gerar o código base do projeto.
+
+**Quer que eu gere agora o prompt específico para o Replit Agent, ou prefere colar esse documento diretamente?**

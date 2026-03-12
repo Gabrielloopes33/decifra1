@@ -34,6 +34,12 @@ import { useEffect, useState } from 'react';
     prioridade: number;
   }
 
+  interface CodigoInfo {
+    codigo: string;
+    usado_em: string;
+    teste_completado_em: string;
+  }
+
   export default function ClienteResultadoScreen() {
     const router = useRouter();
     const params = useLocalSearchParams();
@@ -43,6 +49,7 @@ import { useEffect, useState } from 'react';
     const [loading, setLoading] = useState(true);
     const [resultado, setResultado] = useState<Resultado | null>(null);
     const [protocolos, setProtocolos] = useState<Protocolo[]>([]);
+    const [codigoInfo, setCodigoInfo] = useState<CodigoInfo | null>(null);
 
     useEffect(() => {
       carregarResultado();
@@ -89,6 +96,17 @@ import { useEffect, useState } from 'react';
           }));
           setProtocolos(protocolosFormatados);
         }
+
+        // Buscar informações do código utilizado
+        const { data: codigoData, error: codigoError } = await supabase
+          .from('codigos')
+          .select('codigo, usado_em, teste_completado_em')
+          .eq('cliente_id', clienteId)
+          .single();
+
+        if (!codigoError && codigoData) {
+          setCodigoInfo(codigoData as CodigoInfo);
+        }
       } catch (error: any) {
         console.error('Erro ao carregar resultado:', error);
         Alert.alert('Erro', 'Ocorreu um erro ao carregar os resultados');
@@ -125,6 +143,16 @@ import { useEffect, useState } from 'react';
                 Teste de Personalidade Big Five
               </Text>
             </View>
+
+            {codigoInfo && (
+              <View style={styles.codigoInfoCard}>
+                <Text style={styles.codigoLabel}>Código utilizado</Text>
+                <Text style={styles.codigoValue}>{codigoInfo.codigo}</Text>
+                <Text style={styles.dataTeste}>
+                  Teste realizado em {new Date(codigoInfo.teste_completado_em || codigoInfo.usado_em).toLocaleDateString('pt-BR')}
+                </Text>
+              </View>
+            )}
 
             <View style={styles.mandalaContainer}>
               <Mandala
@@ -202,6 +230,17 @@ import { useEffect, useState } from 'react';
               <Text style={styles.infoText}>
                 Sua treinadora tem acesso a um relatório completo com análise detalhada de todas as 30 facetas e 6 protocolos personalizados.
               </Text>
+            </View>
+
+            {/* Botão Voltar para Home */}
+            <View style={styles.botaoContainer}>
+              <TouchableOpacity
+                style={styles.botaoVoltar}
+                onPress={() => router.replace('/')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.botaoVoltarTexto}>← Voltar para Home</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.espacoFinal} />
@@ -387,5 +426,50 @@ import { useEffect, useState } from 'react';
     },
     espacoFinal: {
       height: 40,
+    },
+    botaoContainer: {
+      paddingHorizontal: 24,
+      marginBottom: 24,
+    },
+    botaoVoltar: {
+      backgroundColor: COLORS.accent,
+      paddingVertical: 16,
+      borderRadius: 12,
+      alignItems: 'center',
+    },
+    botaoVoltarTexto: {
+      color: COLORS.creamLight,
+      fontSize: 16,
+      fontWeight: '600' as const,
+    },
+    codigoInfoCard: {
+      backgroundColor: COLORS.cardBg,
+      borderRadius: 12,
+      padding: 16,
+      marginHorizontal: 24,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: COLORS.cardBorder,
+      alignItems: 'center',
+    },
+    codigoLabel: {
+      fontSize: 12,
+      color: COLORS.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginBottom: 4,
+    },
+    codigoValue: {
+      fontFamily: 'monospace',
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: COLORS.accent,
+      letterSpacing: 1,
+      marginBottom: 8,
+    },
+    dataTeste: {
+      fontSize: 14,
+      color: COLORS.cream,
+      opacity: 0.9,
     },
   });

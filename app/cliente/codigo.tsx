@@ -34,20 +34,23 @@ export default function ClienteCodigoScreen() {
     // Remove caracteres especiais e converte para maiúsculo
     let formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
     
-    // Adiciona o hífen após 3 caracteres
-    if (formatted.length > 3) {
-      formatted = formatted.slice(0, 3) + '-' + formatted.slice(3, 7);
+    // Adiciona hífens no formato DECF-XXXX-XXXX
+    if (formatted.length > 4) {
+      formatted = formatted.slice(0, 4) + '-' + formatted.slice(4);
+    }
+    if (formatted.length > 9) {
+      formatted = formatted.slice(0, 9) + '-' + formatted.slice(9);
     }
     
-    // Limita ao tamanho máximo (ART-XXXX = 8 caracteres)
-    if (formatted.length > 8) {
-      formatted = formatted.slice(0, 8);
+    // Limita ao tamanho máximo (DECF-XXXX-XXXX = 14 caracteres)
+    if (formatted.length > 14) {
+      formatted = formatted.slice(0, 14);
     }
     
     // Validação visual básica
-    if (formatted.length === 8 && formatted.match(/^ART-[A-Z0-9]{4}$/)) {
+    if (formatted.length === 14 && formatted.match(/^DECF-[A-Z0-9]{4}-[A-Z0-9]{4}$/)) {
       setInputState('valid');
-    } else if (formatted.length === 8) {
+    } else if (formatted.length === 14) {
       setInputState('invalid');
     } else {
       setInputState('default');
@@ -70,11 +73,11 @@ export default function ClienteCodigoScreen() {
   };
 
   const validarCodigo = async () => {
-    // Validação do formato
-    if (!codigo || !codigo.match(/^ART-[A-Z0-9]{4}$/)) {
+    // Validação do formato DECF-XXXX-XXXX
+    if (!codigo || !codigo.match(/^DECF-[A-Z0-9]{4}-[A-Z0-9]{4}$/)) {
       shake();
       setInputState('invalid');
-      Alert.alert('Código inválido', 'Por favor, insira um código no formato ART-1234');
+      Alert.alert('Código inválido', 'Por favor, insira um código no formato DECF-XXXX-XXXX');
       return;
     }
 
@@ -184,12 +187,12 @@ export default function ClienteCodigoScreen() {
                       backgroundColor: getInputBackgroundColor(),
                     }
                   ]}
-                  placeholder="ART-1234"
+                  placeholder="DECF-XXXX-XXXX"
                   placeholderTextColor={COLORS.textMuted}
                   value={codigo}
                   onChangeText={(text) => setCodigo(formatarCodigo(text))}
                   autoCapitalize="characters"
-                  maxLength={8}
+                  maxLength={14}
                   editable={!loading}
                 />
                 
@@ -202,7 +205,7 @@ export default function ClienteCodigoScreen() {
               </Animated.View>
 
               <Text style={styles.hint}>
-                Formato: ART-XXXX (3 letras, hífen, 4 caracteres)
+                Formato: DECF-XXXX-XXXX
               </Text>
 
               <TouchableOpacity
@@ -211,7 +214,7 @@ export default function ClienteCodigoScreen() {
                   (loading || codigo.length < 8) && styles.buttonDisabled
                 ]}
                 onPress={validarCodigo}
-                disabled={loading || codigo.length < 8}
+                disabled={loading || codigo.length < 14}
                 activeOpacity={0.8}
               >
                 {loading ? (

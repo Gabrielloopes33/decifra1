@@ -1,0 +1,132 @@
+Kimi:
+Vou gerar as especificações de animação completas, depois definimos o MVP.
+DECIFRA - Especificações de Animação
+PRINCÍPIOS GERAIS
+Princípio
+Valor
+Descrição
+Propósito
+Significado
+Toda animação comunica algo sobre o estado ou conteúdo
+Timing
+200-400ms
+Rápido o suficiente para não esperar, lento o suficiente para perceber
+Easing
+Natural
+Curvas que imitam movimento físico (não linear)
+Consistência
+Padrão
+Mesmas famílias de easing em todo o app
+Performance
+60fps
+Uso de transform e opacity apenas (não layout)
+BIBLIOTECA DE EASING
+// lib/animations.tsexport const easing = {  // Entrada suave (elementos aparecendo)  enter: [0.0, 0.0, 0.2, 1.0], // ease-out    // Saída suave (elementos sumindo)  exit: [0.4, 0.0, 1.0, 1.0], // ease-in    // Movimento padrão (transições de tela)  standard: [0.4, 0.0, 0.2, 1.0], // ease-in-out    // Elasticidade sutil (interações de toque)  spring: [0.34, 1.56, 0.64, 1], // slight overshoot    // Respiração (loops, pulsações)  breathe: [0.45, 0.05, 0.55, 0.95], // sine-like    // Decisão/Confirmação (ações importantes)  emphasis: [0.0, 0.0, 0.2, 1.0], // decelerate};export const duration = {  instant: 0,  fast: 150,      // micro-interações (hover, focus)  normal: 300,    // transições padrão  slow: 500,      // entradas de tela  emphasis: 600,  // momentos importantes  ritual: 2000,   // transições entre estações};
+ANIMAÇÕES POR FLUXO
+1. SPLASH SCREEN → ENTRADA
+1.1 Logo Pulsação (Loop)
+// Animação de entrada do appconst splashAnimation = {  initial: { opacity: 0, scale: 0.8 },    animate: {    opacity: [0, 1, 1, 0.6, 1], // fade in + pulsação    scale: [0.8, 1, 1, 0.98, 1],  },    transition: {    duration: 2500,    times: [0, 0.2, 0.6, 0.8, 1], // keyframes    ease: easing.breathe,  },    exit: {    opacity: 0,    scale: 1.1, // leve zoom out    transition: { duration: 400, ease: easing.exit },  },};
+Descrição visual: - Logo aparece com fade + scale de 0.8→1 - Respira: opacidade 1→0.6→1 (ciclo único, não loop infinito) - Transição para próxima tela: zoom out suave + fade
+2. ENTRADA → SELEÇÃO DE PERFIL
+2.1 Revelação de Opções (Stagger)
+const entranceReveal = {  container: {    initial: { opacity: 0 },    animate: {       opacity: 1,      transition: { staggerChildren: 0.15, delayChildren: 0.3 },    },  },    item: {    initial: { opacity: 0, y: 30 },    animate: {       opacity: 1,       y: 0,      transition: { duration: 500, ease: easing.enter },    },  },    illustration: {    initial: { opacity: 0, scale: 0.9, rotate: -5 },    animate: {       opacity: 1,       scale: 1,       rotate: 0,      transition: { duration: 800, ease: easing.spring },    },  },};
+Sequência: 1. Ilustração orgânica: fade + scale + rotação sutil (800ms) 2. Título: slide up + fade (500ms, delay 300ms) 3. Subtítulo: slide up + fade (500ms, delay 450ms) 4. Botão “Sou cliente”: slide up + fade (500ms, delay 600ms) 5. Botão “Sou treinadora”: slide up + fade (500ms, delay 750ms)
+2.2 Hover/Press nos Botões
+const buttonInteraction = {  rest: { scale: 1, shadowOpacity: 0.1 },    hover: {     scale: 1.02,     shadowOpacity: 0.2,    transition: { duration: 150, ease: easing.standard },  },    press: {     scale: 0.98,     shadowOpacity: 0,    transition: { duration: 100, ease: easing.enter },  },    release: {    scale: 1,    transition: { type: "spring", stiffness: 400, damping: 17 },  },};
+3. FLUXO CLIENTE: INSERIR CÓDIGO
+3.1 Teclado Virtual (Auto-formatação)
+const codeInput = {  // Digitação de cada caractere  character: {    initial: { scale: 1.5, opacity: 0, color: '#C4A77D' },    animate: {       scale: 1,       opacity: 1,       color: '#1A1A1A',      transition: { duration: 200, ease: easing.spring },    },  },    // Cursor piscando  cursor: {    animate: {      opacity: [1, 0, 1],      transition: { duration: 1000, repeat: Infinity, ease: "linear" },    },  },    // Validação: código correto  success: {    scale: [1, 1.05, 1],    borderColor: ['#E5E5E5', '#2C5F5D', '#2C5F5D'],    transition: { duration: 400, ease: easing.spring },  },    // Validação: código incorreto (shake)  error: {    x: [0, -10, 10, -10, 10, 0],    borderColor: '#E74C3C',    transition: { duration: 400, ease: easing.standard },  },};
+Comportamento: - Cada caractere digitado: pop sutil (scale 1.5→1) + cor dourada→preta - Código completo e válido: pulso verde + transição automática (500ms delay) - Código inválido: shake horizontal + borda vermelha (400ms)
+4. FLUXO CLIENTE: TESTE (4 ESTAÇÕES)
+4.1 Transição entre Estações (Ritual)
+const stationTransition = {  // Saída da estação anterior  exit: {    opacity: 0,    scale: 0.95,    filter: 'blur(4px)',    transition: { duration: 400, ease: easing.exit },  },    // Elementos intermediários (loading/mensagem)  intermediate: {    initial: { opacity: 0, y: 20 },    animate: {       opacity: 1,       y: 0,      transition: { duration: 500, ease: easing.enter },    },    exit: {       opacity: 0,       y: -20,      transition: { duration: 300, ease: easing.exit },    },  },    // Entrada da nova estação  enter: {    initial: { opacity: 0, scale: 1.05, filter: 'blur(4px)' },    animate: {       opacity: 1,       scale: 1,      filter: 'blur(0px)',      transition: { duration: 600, ease: easing.enter },    },  },    // Ícone da estação (morphing)  iconMorph: {    // Céu → Montanha → Água → Fogo    path: {      // SVG path interpolation usando react-native-svg      transition: { duration: 800, ease: easing.breathe },    },    color: {      // #5B8A8A → #C4A77D → #4A6FA5 → #B85C38      transition: { duration: 600, ease: easing.standard },    },  },};
+Sequência completa (3 segundos):
+0.0s - Última questão respondida0.0s - Fade out da estação atual (400ms)0.4s - Tela preta/branca ou mensagem "Ótimo progresso"0.4s - Fade in mensagem (500ms)1.9s - Fade out mensagem (300ms)2.2s - Fade in nova estação (600ms)2.8s - Ícone morph + cor transition (800ms, overlap)3.0s - Primeira questão da nova estação interativa
+4.2 Progresso da Barra
+const progressBar = {  // Atualização suave ao responder  fill: {    width: `${(current / 120) * 100}%`,    transition: {       duration: 400,       ease: easing.enter,      // Spring sutil para dar "peso" ao progresso      type: "spring",      stiffness: 100,      damping: 20,    },  },    // Cor por estação  color: {    station1: '#5B8A8A', // azul-esverdeado    station2: '#C4A77D', // ocre    station3: '#4A6FA5', // azul profundo    station4: '#B85C38', // âmbar    transition: { duration: 600 },  },    // Completo: celebração sutil  complete: {    scale: [1, 1.02, 1],    brightness: [1, 1.2, 1],    transition: { duration: 600, ease: easing.spring },  },};
+4.3 Interação com Questão (Slider)
+const questionInteraction = {  // Entrada da questão (slide suave)  enter: {    initial: { opacity: 0, x: 50 },    animate: {       opacity: 1,       x: 0,      transition: { duration: 300, ease: easing.enter },    },    exit: {       opacity: 0,       x: -50,      transition: { duration: 200, ease: easing.exit },    },  },    // Seleção de resposta  optionSelect: {    rest: { scale: 1, borderColor: '#E5E5E5', backgroundColor: '#FFFFFF' },        hover: {       scale: 1.02,       borderColor: '#C4A77D',      transition: { duration: 150 },    },        selected: {       scale: [1, 1.1, 1], // pop sutil      borderColor: '#2C5F5D',      backgroundColor: '#F7F5F3',      transition: { duration: 200, ease: easing.spring },    },        // Ripple effect no toque    press: {      scale: 0.98,      transition: { duration: 100 },    },  },    // Slider específico (se usar slider em vez de botões)  sliderThumb: {    drag: { scale: 1.2, shadowOpacity: 0.3 },    release: {       scale: 1,      transition: { type: "spring", stiffness: 300, damping: 20 },    },  },};
+5. PROCESSANDO RESULTADO
+5.1 Tela de Cálculo (Mandala se Formando)
+const processingAnimation = {  // Fundo: partículas sutis ou gradiente animado  background: {    animate: {      background: [        'radial-gradient(circle at 30% 30%, #F7F5F3 0%, #FFFFFF 100%)',        'radial-gradient(circle at 70% 70%, #F7F5F3 0%, #FFFFFF 100%)',      ],      transition: { duration: 4000, repeat: Infinity, ease: "linear" },    },  },    // Mandala SVG (paths animados)  mandala: {    initial: { pathLength: 0, opacity: 0 },    animate: {       pathLength: 1,       opacity: 1,      transition: {         pathLength: { duration: 2000, ease: easing.enter },        opacity: { duration: 500 },      },    },  },    // Texto "Decifrando..."  textReveal: {    initial: { opacity: 0, y: 10 },    animate: {       opacity: 1,       y: 0,      transition: { staggerChildren: 0.1 },    },    // Cada letra ou palavra aparece em sequência  },    // Itens de checklist (fakes, para dar sensação de progresso)  checklist: {    initial: { opacity: 0, x: -20 },    animate: (i) => ({      opacity: 1,      x: 0,      transition: { delay: i * 400, duration: 300 },    }),    exit: { opacity: 0.5 }, // fica "checked"  },};
+Sequência visual:
+0.0s   - Tela escurece suavemente0.3s   - Texto "Decifrando seu perfil..." aparece (typewriter ou fade)0.5s   - "Analisando 120 respostas..." (check após 800ms)1.3s   - "Calculando 5 fatores..." (check após 600ms)1.9s   - "Mapeando 30 facetas..." (check após 600ms)2.5s   - "Selecionando protocolos..." (check após 800ms)3.3s   - Mandala começa a se formar (SVG paths draw)4.0s   - Fade para resultado
+6. RESULTADO CLIENTE
+6.1 Revelação da Mandala
+const resultReveal = {  // Container  container: {    initial: { opacity: 0 },    animate: {       opacity: 1,      transition: { staggerChildren: 0.2, delayChildren: 0.3 },    },  },    // Mandala principal  mandala: {    initial: { scale: 0.8, opacity: 0, rotate: -10 },    animate: {       scale: 1,       opacity: 1,      rotate: 0,      transition: {         duration: 800,         ease: easing.spring,        // Breathing loop após entrada        repeat: Infinity,        repeatType: "reverse",        repeatDelay: 2,      },    },    // Loop sutil de respiração    breathe: {      scale: [1, 1.02, 1],      transition: { duration: 4000, ease: easing.breathe },    },  },    // Cada "pétala" da mandala (fatores)  petal: (index) => ({    initial: { scale: 0, opacity: 0 },    animate: {       scale: 1,       opacity: 1,      transition: {         delay: 0.5 + (index * 0.15),         duration: 400,         ease: easing.spring,      },    },  }),    // Texto descritivo  description: {    initial: { opacity: 0, y: 20 },    animate: {       opacity: 1,       y: 0,      transition: { delay: 1.2, duration: 500, ease: easing.enter },    },  },    // Protocolos (stagger)  protocols: {    container: {      animate: { transition: { staggerChildren: 0.1, delayChildren: 1.5 } },    },    item: {      initial: { opacity: 0, x: -30 },      animate: {         opacity: 1,         x: 0,        transition: { duration: 400, ease: easing.enter },      },    },  },};
+6.2 Interação com Mandala (Toque nos Fatores)
+const mandalaInteraction = {  // Hover/Toque em um fator  focus: {    scale: 1.05,    filter: 'brightness(1.1)',    transition: { duration: 200 },    // Outros fatores diminuem sutilmente    siblings: { opacity: 0.6, scale: 0.95 },  },    // Expansão para detalhe  expand: {    initial: { scale: 1, borderRadius: '50%' },    animate: {       scale: 20, // zoom até preencher tela      borderRadius: '0%',      transition: { duration: 500, ease: easing.enter },    },  },    // Retorno  collapse: {    scale: 1,    borderRadius: '50%',    transition: { duration: 400, ease: easing.exit },  },};
+7. FLUXO TREINADORA
+7.1 Dashboard - Entrada de Dados
+const dashboardEntrance = {  // Cards aparecem em cascata  cards: {    container: {      animate: { transition: { staggerChildren: 0.1 } },    },    card: {      initial: { opacity: 0, y: 30, scale: 0.95 },      animate: {         opacity: 1,         y: 0,         scale: 1,        transition: { duration: 400, ease: easing.enter },      },    },  },    // Números contando (créditos)  countUp: {    from: 0,    to: valorAtual,    duration: 1000,    ease: easing.exit, // desacelera no final  },    // Lista de clientes (scroll)  listItem: (index) => ({    initial: { opacity: 0, x: -20 },    animate: {       opacity: 1,       x: 0,      transition: { delay: index * 0.05, duration: 300 },    },  }),};
+7.2 Notificação Push (Recebida)
+const notification = {  // Entrada do banner  enter: {    initial: { opacity: 0, y: -100, scale: 0.9 },    animate: {       opacity: 1,       y: 0,      scale: 1,      transition: {         duration: 400,         ease: easing.spring,        // Bounce sutil no topo        type: "spring",        stiffness: 300,        damping: 20,      },    },  },    // Persistência (breathing sutil para chamar atenção)  idle: {    boxShadow: [      '0 4px 20px rgba(0,0,0,0.1)',      '0 4px 25px rgba(44,95,93,0.2)',      '0 4px 20px rgba(0,0,0,0.1)',    ],    transition: { duration: 2000, repeat: 2 }, // para após 2 ciclos  },    // Saída (swipe para cima ou auto-dismiss)  exit: {    opacity: 0,    y: -100,    transition: { duration: 300, ease: easing.exit },  },    // Interação: swipe para ação  swipe: {    threshold: 100, // px    velocity: 500,  // px/s    snapPoints: [0, -100], // fechar ou abrir  },};
+8. MICRO-INTERAÇÕES GLOBAIS
+8.1 Pull-to-Refresh
+const pullToRefresh = {  // Indicador de puxar  indicator: {    rotate: (pullDistance) => ({      rotate: (pullDistance / 100) * 360, // 1 volta completa em 100px    }),    scale: (pullDistance) => ({      scale: Math.min(pullDistance / 50, 1), // max scale 1    }),  },    // Refreshing state  refreshing: {    rotate: { 360: 0, transition: { duration: 1000, repeat: Infinity } },    color: '#2C5F5D',  },    // Success  success: {    scale: [1, 1.2, 1],    color: '#2ECC71',    transition: { duration: 300 },  },};
+8.2 Scroll Parallax (Telas longas)
+const parallaxScroll = {  // Header que encolhe  header: (scrollY) => ({    height: interpolate(scrollY, [0, 200], [200, 80], 'clamp'),    opacity: interpolate(scrollY, [0, 100], [1, 0.8], 'clamp'),  }),    // Elementos que movem em velocidades diferentes  background: (scrollY) => ({    y: scrollY * 0.3, // mais lento  }),    foreground: (scrollY) => ({    y: scrollY * 1.2, // mais rápido (efeito de profundidade)  }),};
+8.3 Feedback Tátil (Haptics)
+// lib/haptics.tsimport * as Haptics from 'expo-haptics';export const hapticFeedback = {  // Seleção de opção  selection: () => Haptics.selectionAsync(),    // Ação bem-sucedida  success: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success),    // Erro/Alerta  error: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error),    // Impacto leve (botões)  light: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light),    // Impacto médio (confirmações)  medium: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium),    // Heavy (ações importantes)  heavy: () => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy),};// Uso combinado com animaçõesconst onSelectOption = () => {  hapticFeedback.selection();  // + animação visual};
+IMPLEMENTAÇÃO TÉCNICA
+Bibliotecas Recomendadas
+{  "dependencies": {    "react-native-reanimated": "~3.6.0",    // Animações nativas 60fps    "react-native-gesture-handler": "~2.14.0", // Gestos (pan, swipe)    "expo-haptics": "~12.8.1",              // Feedback tátil    "react-native-svg": "14.1.0",           // Mandala animada    "lottie-react-native": "6.5.1",         // Animações complexas (opcional)  }}
+Estrutura de Componentes Animados
+// components/animations/index.tsexport { AnimatedMandala } from './AnimatedMandala';export { StationTransition } from './StationTransition';export { ProgressBar } from './ProgressBar';export { ButtonPress } from './ButtonPress';export { FadeInView } from './FadeInView';// hooks/useAnimatedTransition.tsexport const useStationTransition = (currentStation: number) => {  // Lógica de transição entre estações};// hooks/useMandalaAnimation.ts  export const useMandalaAnimation = (scores: FactorScores) => {  // Animação das pétalas baseada nos scores};
+CHECKLIST DE ANIMAÇÕES MVP
+Animação
+Complexidade
+Prioridade
+Status
+Splash pulsação
+Baixa
+Alta
+⬜
+Entrada stagger (botões)
+Baixa
+Alta
+⬜
+Shake de erro no código
+Baixa
+Alta
+⬜
+Transição entre estações
+Alta
+Alta
+⬜
+Progresso da barra
+Baixa
+Alta
+⬜
+Seleção de questão (pop)
+Baixa
+Alta
+⬜
+Processando (mandala draw)
+Alta
+Alta
+⬜
+Revelação do resultado
+Média
+Alta
+⬜
+Mandala interativa
+Alta
+Média
+⬜
+Notificação push
+Média
+Média
+⬜
+Dashboard cards stagger
+Baixa
+Média
+⬜
+Haptics em todas as interações
+Baixa
+Alta
+⬜
+Agora vamos para o MVP! Quer que eu defina:
+Escopo do MVP (o que entra, o que fica para depois)?
+Cronograma de 4 semanas (realista para entrega)?
+Estrutura de dados mínima (tabelas essenciais)?

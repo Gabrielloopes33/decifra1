@@ -60,7 +60,7 @@ CREATE TABLE codigos (
   usado BOOLEAN NOT NULL DEFAULT FALSE,
   cliente_id UUID REFERENCES clientes(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT codigo_formato CHECK (codigo ~ '^ART-[0-9]{4}$')
+  CONSTRAINT codigo_formato CHECK (codigo ~ '^DECF-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$')
 );
 
 CREATE INDEX idx_codigos_codigo ON codigos(codigo);
@@ -268,9 +268,29 @@ RETURNS TEXT AS $$
 DECLARE
   novo_codigo TEXT;
   codigo_existe BOOLEAN;
+  chars TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  i INTEGER;
+  parte1 TEXT;
+  parte2 TEXT;
+  idx INTEGER;
 BEGIN
   LOOP
-    novo_codigo := 'ART-' || LPAD(FLOOR(RANDOM() * 10000)::TEXT, 4, '0');
+    -- Gerar parte 1 (4 caracteres)
+    parte1 := '';
+    FOR i IN 1..4 LOOP
+      idx := 1 + FLOOR(RANDOM() * LENGTH(chars))::INTEGER;
+      parte1 := parte1 || SUBSTRING(chars FROM idx FOR 1);
+    END LOOP;
+    
+    -- Gerar parte 2 (4 caracteres)
+    parte2 := '';
+    FOR i IN 1..4 LOOP
+      idx := 1 + FLOOR(RANDOM() * LENGTH(chars))::INTEGER;
+      parte2 := parte2 || SUBSTRING(chars FROM idx FOR 1);
+    END LOOP;
+    
+    novo_codigo := 'DECF-' || parte1 || '-' || parte2;
+    
     SELECT EXISTS(SELECT 1 FROM codigos WHERE codigo = novo_codigo) INTO codigo_existe;
     IF NOT codigo_existe THEN
       RETURN novo_codigo;
@@ -304,3 +324,97 @@ COMMENT ON TABLE respostas IS '120 respostas do teste IPIP-NEO-120';
 COMMENT ON TABLE resultados IS 'Scores calculados (30 facetas + 5 fatores)';
 COMMENT ON TABLE protocolos IS '90 protocolos comportamentais (3 por faceta)';
 COMMENT ON TABLE protocolos_recomendados IS 'Protocolos recomendados para cada cliente';
+
+-- ================================================
+-- ADMINISTRAÇÃO - SUPORTE A ADMINISTRADORES
+-- ================================================
+
+-- 1. Adicionar coluna is_admin na tabela treinadoras
+ALTER TABLE treinadoras ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
+
+-- 2. Função auxiliar para verificar se o usuário é admin
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM treinadoras 
+    WHERE auth_user_id = auth.uid() AND is_admin = true
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ================================================
+-- POLÍTICAS RLS PARA ADMINISTRADORES
+-- ================================================
+
+-- Admins podem ver todas as treinadoras
+CREATE POLICY "Admins podem ver todas as treinadoras"
+  ON treinadoras FOR SELECT
+  USING (is_admin());
+
+-- Admins podem criar novas treinadoras
+CREATE POLICY "Admins podem criar treinadoras"
+  ON treinadoras FOR INSERT
+  WITH CHECK (is_admin());
+
+-- Admins podem atualizar treinadoras (créditos, dados, etc)
+CREATE POLICY "Admins podem atualizar treinadoras"
+  ON treinadoras FOR UPDATE
+  USING (is_admin());
+
+-- Admins podem excluir treinadoras
+CREATE POLICY "Admins podem excluir treinadoras"
+  ON treinadoras FOR DELETE
+  USING (is_admin());
+
+-- Admins podem ver todos os códigos
+CREATE POLICY "Admins podem ver todos os codigos"
+  ON codigos FOR SELECT
+  USING (is_admin());
+
+-- Admins podem criar códigos para qualquer treinadora
+CREATE POLICY "Admins podem criar codigos"
+  ON codigos FOR INSERT
+  WITH CHECK (is_admin());
+
+-- Admins podem excluir códigos
+CREATE POLICY "Admins podem excluir codigos"
+  ON codigos FOR DELETE
+  USING (is_admin());
+
+-- Admins podem ver todos os clientes
+CREATE POLICY "Admins podem ver todos os clientes"
+  ON clientes FOR SELECT
+  USING (is_admin());
+
+-- Admins podem excluir clientes
+CREATE POLICY "Admins podem excluir clientes"
+  ON clientes FOR DELETE
+  USING (is_admin());
+
+-- Admins podem ver todas as respostas
+CREATE POLICY "Admins podem ver todas as respostas"
+  ON respostas FOR SELECT
+  USING (is_admin());
+
+-- Admins podem excluir respostas
+CREATE POLICY "Admins podem excluir respostas"
+  ON respostas FOR DELETE
+  USING (is_admin());
+
+-- Admins podem ver todos os resultados
+CREATE POLICY "Admins podem ver todos os resultados"
+  ON resultados FOR SELECT
+  USING (is_admin());
+
+-- Admins podem excluir resultados
+CREATE POLICY "Admins podem excluir resultados"
+  ON resultados FOR DELETE
+  USING (is_admin());
+
+-- Admins podem ver todos os protocolos recomendados
+CREATE POLICY "Admins podem ver todos os protocolos recomendados"
+  ON protocolos_recomendados FOR SELECT
+  USING (is_admin());
+
+COMMENT ON FUNCTION is_admin() IS 'Verifica se o usuário autenticado é administrador';

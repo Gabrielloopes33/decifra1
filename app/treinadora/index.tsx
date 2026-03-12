@@ -27,6 +27,7 @@ import { useState, useEffect } from 'react';
     nome: string;
     status: 'ativo' | 'em_andamento' | 'completo';
     created_at: string;
+    codigo?: string;
   }
 
   export default function TreinadoraDashboardScreen() {
@@ -131,14 +132,23 @@ import { useState, useEffect } from 'react';
 
         const { data: clientesData, error: clientesError } = await supabase
           .from('clientes')
-          .select('*')
+          .select(`
+            *,
+            codigos:codigos!cliente_id(codigo)
+          `)
           .eq('treinadora_id', treinadoraData.id)
           .order('created_at', { ascending: false });
+
+        // Processar dados para incluir código
+        const clientesProcessados = clientesData?.map((c: any) => ({
+          ...c,
+          codigo: c.codigos?.[0]?.codigo || null,
+        }));
 
         if (clientesError) {
           console.error('Erro ao buscar clientes:', clientesError);
         } else {
-          setClientes(clientesData || []);
+          setClientes(clientesProcessados || []);
         }
       } catch (error: any) {
         console.error('Erro ao carregar dados:', error);
@@ -313,6 +323,20 @@ import { useState, useEffect } from 'react';
             </TouchableOpacity>
           </View>
 
+          {/* NOVO: Botão Meus Códigos */}
+          <TouchableOpacity
+            style={styles.meusCodigosButton}
+            onPress={() => router.push('/treinadora/codigos')}
+          >
+            <View style={styles.meusCodigosContent}>
+              <Text style={styles.meusCodigosTitle}>🎟️ Meus Códigos</Text>
+              <Text style={styles.meusCodigosSubtitle}>
+                Ver todos os códigos disponíveis
+              </Text>
+            </View>
+            <Text style={styles.meusCodigosArrow}>→</Text>
+          </TouchableOpacity>
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Meus Clientes ({clientes.length})</Text>
             
@@ -336,6 +360,11 @@ import { useState, useEffect } from 'react';
                     <Text style={styles.clientDate}>
                       {new Date(cliente.created_at).toLocaleDateString('pt-BR')}
                     </Text>
+                    {cliente.codigo && (
+                      <Text style={styles.clientCodigo}>
+                        🎟️ {cliente.codigo}
+                      </Text>
+                    )}
                   </View>
                   <View
                     style={[
@@ -494,6 +523,12 @@ import { useState, useEffect } from 'react';
       color: COLORS.textMuted,
       marginTop: 4,
     },
+    clientCodigo: {
+      fontSize: 12,
+      color: COLORS.accent,
+      marginTop: 4,
+      fontFamily: 'monospace',
+    },
     statusBadge: {
       paddingHorizontal: 12,
       paddingVertical: 6,
@@ -514,5 +549,36 @@ import { useState, useEffect } from 'react';
       color: COLORS.cream,
       fontSize: 16,
       fontWeight: '600' as const,
+    },
+    meusCodigosButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginHorizontal: 24,
+      marginTop: -8,
+      marginBottom: 24,
+      padding: 20,
+      backgroundColor: COLORS.cardBg,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: COLORS.cardBorder,
+    },
+    meusCodigosContent: {
+      flex: 1,
+    },
+    meusCodigosTitle: {
+      fontSize: 18,
+      fontWeight: 'bold' as const,
+      color: COLORS.cream,
+      marginBottom: 4,
+    },
+    meusCodigosSubtitle: {
+      fontSize: 14,
+      color: COLORS.textSecondary,
+    },
+    meusCodigosArrow: {
+      fontSize: 24,
+      color: COLORS.accent,
+      marginLeft: 8,
     },
   });

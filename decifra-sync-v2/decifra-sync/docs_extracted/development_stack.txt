@@ -1,0 +1,516 @@
+Kimi:
+Vou gerar o PRD completo e atualizado com todas as informações dos documentos e da transcrição.
+DECIFRA - Product Requirements Document (PRD)
+Versão: 2.0Data: 10/03/2026Status: Em desenvolvimentoAutor: [Seu nome] - NexIACliente: Ártio (Isa Moreira)
+1. VISÃO GERAL DO PRODUTO
+1.1 Propósito
+O DECIFRA é um aplicativo mobile de avaliação de personalidade baseado no modelo Big Five (IPIP-NEO-120), desenvolvido para digitalizar e escalar o método proprietário da Ártio. O sistema conecta três perfis: admin (Ártio), treinadoras comportamentais certificadas e clientes finais.
+1.2 Problema Resolvido
+Hoje as treinadoras aplicam o diagnóstico Big Five manualmente via planilhas, recebendo apenas números brutos sem interpretação visual ou recomendação de protocolos de intervenção. O app transforma esse processo em uma experiência completa, automatizada e cientificamente validada.
+1.3 Diferencial Competitivo
+Não é apenas o diagnóstico. O valor real está nos 90 protocolos de trabalho — planos de ação personalizados que o app sugere automaticamente com base nas combinações específicas das 30 facetas de personalidade identificadas, priorizando segurança emocional primeiro (Neuroticismo), depois execução, limites, energia e visão.
+1.4 Identidade Visual
+Baseada no ícone fornecido: - Conceito: Olho estilizado com espiral interna = “visão”, “profundidade”, “decifrar”, “introspecção” - Paleta: Gradientes de terracota/laranja queimado para vinho escuro - Significado: Calor humano, profundidade, transformação
+1.5 Públicos-Alvo
+Perfil
+Quantidade Estimada
+Acesso
+Necessidade Principal
+Admin (Ártio)
+1-5
+Painel web
+Gerenciar treinadoras, métricas de uso
+Treinadoras
+50-500
+App mobile (login)
+Comprar créditos, gerar códigos, visualizar resultados completos + protocolos
+Clientes Finais
+1.000-10.000
+App mobile (código)
+Responder teste, visualizar perfil básico
+2. REQUISITOS FUNCIONAIS
+2.1 Fluxo Principal do Sistema
+HOTMART (compra de créditos) → SUPABASE (webhook) → TREINADORA (recebe códigos)                                                          ↓                                                    CLIENTE (usa código)                                                          ↓                                                    TESTE IPIP-NEO-120                                                          ↓                                                    RESULTADO EM DOIS NÍVEIS:                                                    ├─ Cliente: "Quem você é"                                                    └─ Treinadora: "O que fazer com isso"
+2.2 Módulos do Sistema
+Módulo 1: Autenticação e Gestão de Acesso
+ID
+Requisito
+Prioridade
+Status
+AUTH-001
+Treinadoras fazem login com email/senha (Supabase Auth)
+Alta
+⬜
+AUTH-002
+Clientes acessam apenas com código alfanumérico de 8 caracteres (formato ART-XXXX)
+Alta
+⬜
+AUTH-003
+Códigos são únicos, gerados pela treinadora, vinculados a créditos comprados
+Alta
+⬜
+AUTH-004
+Códigos expiram após 30 dias se não usados
+Média
+⬜
+AUTH-005
+Sessão de cliente persiste por 7 dias (AsyncStorage)
+Média
+⬜
+AUTH-006
+Treinadoras podem recuperar senha via email
+Média
+⬜
+AUTH-007
+Dois níveis de acesso: Cliente (código) vs Treinadora (login)
+Alta
+⬜
+Módulo 2: Compra e Gestão de Créditos
+ID
+Requisito
+Prioridade
+Status
+CRED-001
+Treinadora compra créditos via Hotmart (fora do app, evitar taxa Apple/Google 30%)
+Alta
+⬜
+CRED-002
+Webhook Hotmart notifica Supabase da compra
+Alta
+⬜
+CRED-003
+Sistema gera códigos automaticamente (1 código = 1 crédito)
+Alta
+⬜
+CRED-004
+Códigos enviados por email para treinadora
+Alta
+⬜
+CRED-005
+Treinadora visualiza saldo de créditos no app
+Média
+⬜
+CRED-006
+Treinadora gera e compartilha código para cliente específico
+Alta
+⬜
+Módulo 3: Teste IPIP-NEO-120 (Experiência Ritualística)
+ID
+Requisito
+Prioridade
+Status
+TEST-001
+120 itens apresentados em ordem fixa anti-manipulação (documentada)
+Alta
+⬜
+TEST-002
+Escala Likert 5 pontos com labels semânticos: “Discordo totalmente” → “Concordo totalmente”
+Alta
+⬜
+TEST-003
+30 itens invertidos (pontuação reversa automática)
+Alta
+⬜
+TEST-004
+4 Estações Temáticas (30 itens cada): Pensar → Agir → Conectar → Reagir
+Alta
+⬜
+TEST-005
+Transições suaves entre estações (pausa mental de 2s)
+Média
+⬜
+TEST-006
+Progresso salvo localmente a cada resposta (pode retomar)
+Alta
+⬜
+TEST-007
+Tempo estimado: 15-20 minutos
+Média
+⬜
+TEST-008
+Validação: todas as 120 questões obrigatórias
+Alta
+⬜
+TEST-009
+Detecção de padrões suspeitos (respostas iguais, tempo muito rápido)
+Baixa
+⬜
+Módulo 4: Cálculo e Resultados
+ID
+Requisito
+Prioridade
+Status
+RES-001
+Cálculo dos 5 fatores (OCEAN) com percentil 5-95%
+Alta
+⬜
+RES-002
+Cálculo das 30 facetas (6 por fator) com percentil 5-95%
+Alta
+⬜
+RES-003
+Classificação: Muito Baixo, Baixo, Médio, Alto, Muito Alto
+Alta
+⬜
+RES-004
+Visualização Mandala Orgânica (não barras frias) para os 5 fatores
+Alta
+⬜
+RES-005
+Textos interpretativos por faixa (25 textos: 5 fatores × 5 faixas)
+Alta
+⬜
+RES-006
+Dois níveis de resultado:
+Alta
+⬜
+• Cliente: “Quem você é” (gráficos + textos + 3 protocolos)
+• Treinadora: “O que fazer com isso” (completo + 6 protocolos)
+Módulo 5: Sistema de Protocolos (Core do Produto)
+ID
+Requisito
+Prioridade
+Status
+PROT-001
+90 protocolos cadastrados (3 por faceta: polo alto, polo baixo, ajuste fino)
+Alta
+⬜
+PROT-002
+Lógica de recomendação por faceta individual
+Alta
+⬜
+PROT-003
+Lógica de recomendação por combinação de facetas (ex: N alto + C5 baixo)
+Alta
+⬜
+PROT-004
+Regra de segurança primeiro: N1, N5, N6 puxam prioridade quando altos
+Alta
+⬜
+PROT-005
+Priorização por gravidade: Muito Alto/Baixo = 3pts, Alto/Baixo = 2pts, Médio = 0pt
+Alta
+⬜
+PROT-006
+Ordem de apresentação: Regulação → Execução → Limites → Energia → Visão
+Alta
+⬜
+PROT-007
+Cliente vê: 3 protocolos principais + 1 ajuste fino (total 4)
+Alta
+⬜
+PROT-008
+Treinadora vê: 3 principais + 2 complementares + 1 ajuste fino (total 6)
+Alta
+⬜
+PROT-009
+Cada protocolo: nome, descrição, objetivo, exercícios práticos
+Alta
+⬜
+Módulo 6: Notificações e Comunicação
+ID
+Requisito
+Prioridade
+Status
+NOT-001
+Email automático com códigos para treinadora (após compra Hotmart)
+Alta
+⬜
+NOT-002
+Notificação para treinadora quando cliente completa teste
+Alta
+⬜
+NOT-003
+Formato da notificação: push no app + email (a confirmar)
+Média
+⬜
+NOT-004
+Lembrete para cliente retomar teste incompleto (após 24h)
+Baixa
+⬜
+Módulo 7: Exportação e Compartilhamento
+ID
+Requisito
+Prioridade
+Status
+EXP-001
+Treinadora exporta resultado completo em PDF
+Média
+⬜
+EXP-002
+PDF contém: gráficos, textos, 6 protocolos recomendados
+Média
+⬜
+EXP-003
+Envio por email direto do app
+Média
+⬜
+EXP-004
+Exportação permite visualização em desktop (tela maior)
+Média
+⬜
+3. REQUISITOS NÃO-FUNCIONAIS
+ID
+Requisito
+Especificação
+Status
+RNF-001
+Performance
+Scroll 60fps, carregamento < 2s, FlatList otimizado
+⬜
+RNF-002
+Offline
+Progresso do teste salvo localmente (AsyncStorage)
+⬜
+RNF-003
+Segurança
+RLS no Supabase, dados criptografados, LGPD compliant
+⬜
+RNF-004
+Acessibilidade
+Fontes ajustáveis, contraste adequado, VoiceOver/TalkBack
+⬜
+RNF-005
+Escalabilidade
+Suportar 10.000+ clientes simultâneos
+⬜
+RNF-006
+Tempo de resposta
+Cálculo de scoring < 1s após última resposta
+⬜
+4. STACK TÉCNICA
+4.1 Frontend Mobile
+Componente
+Tecnologia
+Justificativa
+Framework
+React Native (Expo)
+Codebase único iOS/Android, familiaridade do dev
+Navegação
+Expo Router
+File-based routing, animações nativas
+UI
+NativeWind (Tailwind)
+Produtividade, consistência com identidade visual
+Animações
+React Native Reanimated
+Transições fluidas entre estações
+Gráficos
+Victory Native XL ou React Native SVG
+Mandala orgânica personalizada
+Estado
+Zustand
+Simples, eficiente para fluxo de teste
+Cache
+React Query + AsyncStorage
+Sincronização server state + persistência local
+4.2 Backend e Infra
+Componente
+Tecnologia
+Justificativa
+Banco de dados
+Supabase PostgreSQL
+Familiaridade, RLS, realtime subscriptions
+Autenticação
+Supabase Auth
+JWT, magic link, gerenciamento de sessões
+Storage
+Supabase Storage
+PDFs exportados, backups
+Serverless
+Supabase Edge Functions (Deno)
+Webhook Hotmart, processamento de scoring
+Email
+Resend
+Alta entregabilidade, templates personalizados
+4.3 Ferramentas
+Uso
+Ferramenta
+IDE
+VS Code
+Prototipagem
+Figma (quando receber ID visual completo)
+Testes
+Expo Go, TestFlight, Play Console Internal Testing
+Build
+EAS Build (Expo Application Services)
+Analytics
+Expo Insights ou PostHog
+5. ARQUITETURA DE DADOS
+5.1 Schema SQL (Supabase)
+-- Habilitar extensõescreate extension if not exists "uuid-ossp";-- Tabela: treinadoras (estende auth.users)create table public.treinadoras (  id uuid references auth.users on delete cascade primary key,  nome text not null,  email text unique not null,  telefone text,  status text default 'ativo' check (status in ('ativo', 'inativo', 'pendente')),  creditos_disponiveis integer default 0,  created_at timestamp with time zone default timezone('utc'::text, now()) not null,  updated_at timestamp with time zone default timezone('utc'::text, now()) not null);-- Tabela: codigoscreate table public.codigos (  codigo text primary key, -- formato: ART-XXXX (8 chars)  treinadora_id uuid references public.treinadoras(id) on delete cascade not null,  status text default 'ativo' check (status in ('ativo', 'usado', 'expirado')),  usado_por uuid references public.clientes(id) on delete set null,  created_at timestamp with time zone default timezone('utc'::text, now()) not null,  usado_em timestamp with time zone,  expires_at timestamp with time zone default (now() + interval '30 days'));-- Tabela: clientes (acesso anônimo por código)create table public.clientes (  id uuid default uuid_generate_v4() primary key,  nome text not null,  email text,  codigo_usado text references public.codigos(codigo) on delete set null,  treinadora_id uuid references public.treinadoras(id) on delete set null,  created_at timestamp with time zone default timezone('utc'::text, now()) not null,  teste_completado boolean default false);-- Tabela: respostas (120 itens por cliente)create table public.respostas (  id uuid default uuid_generate_v4() primary key,  cliente_id uuid references public.clientes(id) on delete cascade not null,  item_numero integer not null check (item_numero between 1 and 120),  resposta integer not null check (resposta between 1 and 5),  fator text not null check (fator in ('N', 'E', 'O', 'A', 'C')),  faceta integer not null check (faceta between 1 and 6),  invertido boolean default false,  created_at timestamp with time zone default timezone('utc'::text, now()) not null,  unique(cliente_id, item_numero));-- Tabela: resultados (calculados após teste completo)create table public.resultados (  id uuid default uuid_generate_v4() primary key,  cliente_id uuid references public.clientes(id) on delete cascade not null,  tipo text check (tipo in ('fator', 'faceta')),  codigo text not null, -- ex: 'N', 'N1', 'E', 'E3'  nome text not null, -- ex: 'Neuroticismo', 'Ansiedade'  score_bruto integer not null,  percentil integer not null check (percentil between 5 and 95),  classificacao text check (classificacao in ('Muito Baixo', 'Baixo', 'Médio', 'Alto', 'Muito Alto')),  created_at timestamp with time zone default timezone('utc'::text, now()) not null);-- Tabela: protocolos (90 protocolos)create table public.protocolos (  id text primary key, -- ex: 'N1-A', 'N1-B', 'N1-C'  nome text not null,  descricao text not null,  objetivo text not null,  exercicios jsonb,  fator text not null,  faceta integer not null,  tipo text check (tipo in ('polo_alto', 'polo_baixo', 'ajuste_fino')),  combinacoes_alvo text[], -- array de códigos para lógica de combinação  created_at timestamp with time zone default timezone('utc'::text, now()) not null);-- Tabela: protocolos_recomendadoscreate table public.protocolos_recomendados (  id uuid default uuid_generate_v4() primary key,  cliente_id uuid references public.clientes(id) on delete cascade not null,  protocolo_id text references public.protocolos(id) on delete cascade not null,  prioridade integer not null check (prioridade between 1 and 6),  tipo_exibicao text check (tipo_exibicao in ('cliente', 'treinadora')), -- diferenciação de acesso  created_at timestamp with time zone default timezone('utc'::text, now()) not null,  unique(cliente_id, protocolo_id));-- Tabela: compras (histórico Hotmart)create table public.compras (  id uuid default uuid_generate_v4() primary key,  treinadora_id uuid references public.treinadoras(id) on delete cascade not null,  hotmart_transaction text unique not null,  product_id text not null,  quantidade_creditos integer not null,  valor_pago numeric(10,2),  status text default 'confirmada',  created_at timestamp with time zone default timezone('utc'::text, now()) not null);-- Índices para performancecreate index idx_codigos_treinadora on public.codigos(treinadora_id);create index idx_codigos_status on public.codigos(status);create index idx_respostas_cliente on public.respostas(cliente_id);create index idx_resultados_cliente on public.resultados(cliente_id);create index idx_protocolos_rec_cliente on public.protocolos_recomendados(cliente_id);create index idx_protocolos_fator_faceta on public.protocolos(fator, faceta);
+5.2 Row Level Security (RLS)
+-- Treinadoras só veem seus próprios dadosalter table public.treinadoras enable row level security;create policy "Treinadoras veem próprio perfil"  on public.treinadoras for select  using (auth.uid() = id);-- Códigos: treinadora só vê seus códigosalter table public.codigos enable row level security;create policy "Treinadora vê seus códigos"  on public.codigos for select  using (treinadora_id = auth.uid());-- Clientes: acesso por código (função customizada)alter table public.clientes enable row level security;create policy "Acesso por código válido"  on public.clientes for select  using (    codigo_usado = current_setting('app.current_codigo', true) or    treinadora_id = auth.uid()  );-- Resultados: cliente vê próprio, treinadora vê de suas clientesalter table public.resultados enable row level security;create policy "Acesso controlado a resultados"  on public.resultados for select  using (    exists (      select 1 from public.clientes c       where c.id = cliente_id       and (c.codigo_usado = current_setting('app.current_codigo', true)            or c.treinadora_id = auth.uid())    )  );
+6. ESTRUTURA DE PASTAS (React Native)
+decifra/├── app/                          # Expo Router│   ├── (auth)/                   # Rotas autenticadas (treinadora)│   │   ├── _layout.tsx           # Tab navigation (Dashboard, Códigos, Clientes, Perfil)│   │   ├── dashboard.tsx         # Home: saldo, últimos clientes, ações rápidas│   │   ├── codigos/│   │   │   ├── index.tsx         # Gerar e gerenciar códigos│   │   │   └── [codigo].tsx      # Detalhe do código│   │   ├── clientes/│   │   │   ├── index.tsx         # Lista de clientes│   │   │   └── [id].tsx          # Resultado completo + 6 protocolos│   │   └── perfil.tsx            # Dados da treinadora, logout│   ├── (teste)/                  # Fluxo do cliente (acesso por código)│   │   ├── _layout.tsx           # Sem navegação, fullscreen│   │   ├── intro.tsx             # Tela inicial: "Descubra sua arquitetura emocional"│   │   ├── estacao1.tsx          # Estação 1: "Como você pensa" (itens 1-30)│   │   ├── estacao2.tsx          # Estação 2: "Como você age" (itens 31-60)│   │   ├── estacao3.tsx          # Estação 3: "Como você conecta" (itens 61-90)│   │   ├── estacao4.tsx          # Estação 4: "Como você reage" (itens 91-120)│   │   ├── processando.tsx       # Tela de cálculo: "Decifrando seu perfil..."│   │   └── resultado.tsx         # Resultado cliente: "Quem você é" + 3 protocolos│   ├── login.tsx                 # Login treinadora│   └── _layout.tsx               # Root layout com verificação de sessão├── components/│   ├── ui/                       # Buttons, inputs, cards (NativeWind)│   ├── mandala/                  # Visualização dos 5 fatores (SVG animado)│   ├── estacao/                  # Componentes específicos de cada estação│   └── protocolo/                # Cards de protocolo recomendado├── hooks/│   ├── useAuth.ts│   ├── useTeste.ts               # Gerenciamento do estado do teste│   ├── useScoring.ts             # Cálculo de percentis│   └── useProtocolos.ts          # Lógica de recomendação├── stores/│   ├── authStore.ts│   ├── testeStore.ts             # Estado das 120 respostas│   └── resultadoStore.ts├── lib/│   ├── supabase.ts│   ├── constants.ts              # 120 itens, ordem fixa, textos│   ├── scoring.ts                # Algoritmos de cálculo│   └── protocolos.ts             # Lógica de recomendação├── types/│   └── index.ts└── assets/    ├── icon.png                  # Ícone fornecido    ├── fonts/    └── animations/
+7. ALGORITMO DE RECOMENDAÇÃO DE PROTOCOLOS
+// Pseudo-código da lógica de recomendaçãofunction recomendarProtocolos(resultados: Resultado[]): ProtocoloRecomendado[] {  const pontuacoes: Map<string, number> = new Map();    // 1. Pontuar por faceta individual  for (const r of resultados.filter(r => r.tipo === 'faceta')) {    let pontos = 0;    if (r.classificacao === 'Muito Alto' || r.classificacao === 'Muito Baixo') {      pontos = 3;    } else if (r.classificacao === 'Alto' || r.classificacao === 'Baixo') {      pontos = 2;    }        // Bônus de segurança: N1, N5, N6    if (['N1', 'N5', 'N6'].includes(r.codigo) && pontos > 0) {      pontos += 1;    }        pontuacoes.set(r.codigo, pontos);  }    // 2. Verificar combinações críticas  const combinacoes = [    { fatores: ['N', 'C5'], alto: ['N'], baixo: ['C5'],       protocolos: ['N6-A', 'C5-B'] }, // N alto + C5 baixo    { fatores: ['N1', 'C6'], alto: ['N1', 'C6'],       protocolos: ['N1-A', 'C6-A'] }, // N1 alto + C6 alto    // ... outras combinações  ];    for (const combo of combinacoes) {    if (matchCombinacao(resultados, combo)) {      for (const pid of combo.protocolos) {        pontuacoes.set(pid, (pontuacoes.get(pid) || 0) + 2);      }    }  }    // 3. Ordenar por prioridade e categorizar  const ordenados = Array.from(pontuacoes.entries())    .sort((a, b) => b[1] - a[1]);    return {    cliente: ordenados.slice(0, 3).map(p => ({ id: p[0], tipo: 'principal' }))      .concat(ordenados[3] ? [{ id: ordenados[3][0], tipo: 'ajuste_fino' }] : []),    treinadora: ordenados.slice(0, 3).map(p => ({ id: p[0], tipo: 'principal' }))      .concat(ordenados.slice(3, 5).map(p => ({ id: p[0], tipo: 'complementar' })))      .concat(ordenados[5] ? [{ id: ordenados[5][0], tipo: 'ajuste_fino' }] : [])  };}
+8. CRONOGRAMA DE DESENVOLVIMENTO
+Fase 1: Fundação (Semanas 1-2)
+Semana
+Entregável
+1
+Setup Expo + Supabase, estrutura de pastas, navegação base
+1
+Configurar Supabase Auth, tabelas iniciais, RLS básico
+2
+Tela de login treinadora, dashboard inicial
+2
+Sistema de códigos: geração, validação, ativação
+Fase 2: Core do Teste (Semanas 3-5)
+Semana
+Entregável
+3
+Interface das 4 estações (30 questões cada)
+3
+Persistência offline (AsyncStorage)
+4
+Animações de transição entre estações
+4
+Lógica de scoring (cálculo fatores/facetas)
+5
+Visualização mandala dos 5 fatores
+Fase 3: Resultados e Protocolos (Semanas 6-7)
+Semana
+Entregável
+6
+Textos interpretativos (25 por fator)
+6
+Implementação dos 90 protocolos
+7
+Lógica de recomendação (individual + combinações)
+7
+Diferenciação cliente (4 protocolos) vs treinadora (6 protocolos)
+Fase 4: Integrações (Semanas 8-9)
+Semana
+Entregável
+8
+Edge Function Hotmart (webhook)
+8
+Envio de email com códigos (Resend)
+9
+Notificações (push/email quando cliente completa)
+9
+Geração e exportação de PDF
+Fase 5: Polish e Publicação (Semanas 10-12)
+Semana
+Entregável
+10
+Testes integrados, ajustes de UX
+11
+Build EAS, TestFlight (iOS), Internal Testing (Android)
+12
+Review Apple/Google, ajustes, publicação
+9. DEPENDÊNCIAS EXTERNAS
+Da Ártio (Cliente)
+Item
+Responsável
+Prazo
+Status
+Bloqueia?
+D-U-N-S Number
+Isa
+5-30 dias
+⬜
+SIM
+Site no ar (artio.com.br)
+Isa
+1-2 dias
+⬜
+SIM
+Email @artio.com.br para dev
+Isa
+1 dia
+⬜
+SIM
+Apple Developer Program
+Isa
+2-7 dias
+⬜
+SIM
+Google Play Developer
+Isa
+1-3 dias
+⬜
+SIM
+Clareza sobre 20 protocolos “generalistas”
+Isa/JJ
+?
+⬜
+Não (usa 90 documentados)
+60 labels dos polos das facetas
+Isa
+?
+⬜
+Não (usa placeholders)
+ID Visual completo (cores, fontes)
+Isa
+?
+⬜
+Não (usa ícone como base)
+Da NexIA
+Item
+Responsável
+Status
+Conta Supabase (projeto)
+Dev
+⬜
+Conta Resend (email)
+Dev
+⬜
+Conta EAS (build)
+Dev
+⬜
+Conta Hotmart (sandbox)
+Dev
+⬜
+10. RISCOS E MITIGAÇÕES
+Risco
+Probabilidade
+Impacto
+Mitigação
+Isa demora com D-U-N-S
+Alta
+Alto
+Começar dev em conta pessoal, migrar depois
+Apple rejeita (categoria health)
+Média
+Alto
+Usar “Lifestyle”, não “Medical”; disclaimer claro
+Performance ruim nas 120 questões
+Baixa
+Médio
+FlatList otimizado desde início
+Hotmart muda API
+Baixa
+Médio
+Documentar integração, testes automatizados
+20 protocolos “generalistas” não identificados
+Média
+Baixo
+Usar 90 documentados; perguntar para Isa
+11. HISTÓRICO DE VERSÕES
+Versão
+Data
+Autor
+Alterações
+1.0
+10/03/2026
+[Seu nome]
+Versão inicial, stack definida
+2.0
+10/03/2026
+[Seu nome]
+Atualizado com: transcrição onboarding, 90 protocolos, dois níveis de resultado, 4 estações temáticas, fluxo Hotmart confirmado
+12. APÊNDICES
+Apêndice A: Ordem Fixa dos 120 Itens (Anti-Manipulação)
+[73,45,117,9,29,101,53,85,37,65,1,21,97,77,49,109,61,33,13,5,89,41,113,17,69,105,57,81,25,93,2,46,118,10,30,102,54,86,38,66,22,98,78,50,110,62,34,14,6,90,42,114,18,70,106,58,82,26,94,74,3,47,119,11,31,103,55,87,39,67,23,99,79,51,111,63,35,15,7,91,43,115,19,71,107,59,83,27,95,75,4,48,120,12,32,104,56,88,40,68,24,100,80,52,112,64,36,16,8,92,44,116,20,72,108,60,84,28,96,76]
+Apêndice B: Estrutura dos 90 Protocolos
+N1-A, N1-B, N1-C (Ansiedade: polo alto, polo baixo, ajuste fino)N2-A, N2-B, N2-C (Raiva)...C6-A, C6-B, C6-C (Cautela)
+Apêndice C: Links Úteis
+Supabase Docs: https://supabase.com/docs
+Expo Docs: https://docs.expo.dev
+EAS Build: https://docs.expo.dev/build/introduction/
+IPIP-NEO-120: https://ipip.ori.org/
+Próxima atualização: Após aprovação do fluxo de navegação pela Ártio.
+PRD completo e atualizado! Agora vamos para o fluxo de navegação detalhado?

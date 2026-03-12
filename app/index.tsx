@@ -78,6 +78,11 @@ export default function IndexScreen() {
     router.push('/cliente/codigo');
   };
 
+  const handleAdmin = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    router.push('/(admin)/login');
+  };
+
   return (
     <LinearGradient
       colors={[...GRADIENTS.splash]}
@@ -156,6 +161,11 @@ export default function IndexScreen() {
               <Text style={styles.buttonTextSecondary}>Tenho um Código</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Admin Access (dev mode) */}
+          <TouchableOpacity style={styles.adminButton} onPress={handleAdmin}>
+            <Text style={styles.adminText}>Acesso Admin</Text>
+          </TouchableOpacity>
 
           {/* Footer */}
           <View style={styles.footer}>
@@ -321,5 +331,20 @@ const styles = StyleSheet.create({
     color: COLORS.cream,
     opacity: 0.6,
     letterSpacing: 1,
+  },
+  adminButton: {
+    position: 'absolute',
+    bottom: 90,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  adminText: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.5)',
+    fontWeight: '500',
   },
 });

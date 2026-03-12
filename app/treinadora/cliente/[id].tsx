@@ -372,16 +372,25 @@ const styles = StyleSheet.create({
     paddingTop: 16,
   },
   backButton: {
-    paddingVertical: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: COLORS.creamLight,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   backButtonText: {
     fontSize: 16,
-    color: COLORS.accent,
+    color: COLORS.dark1,
     fontWeight: '600',
   },
   clienteInfo: {
     paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingTop: 40,
     paddingBottom: 16,
   },
   clienteNome: {

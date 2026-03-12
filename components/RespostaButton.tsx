@@ -57,10 +57,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 4,
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 2,
     borderRadius: 12,
     borderWidth: 1,
+    minHeight: 70,
   },
   valor: {
     fontSize: 20,
@@ -68,9 +70,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   label: {
-    fontSize: 10,
+    fontSize: 9,
     textAlign: 'center',
-    lineHeight: 14,
+    lineHeight: 12,
     fontWeight: '500',
   },
 });

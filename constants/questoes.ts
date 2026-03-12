@@ -30,7 +30,7 @@ import { QUESTAO_FACETA_MAP, QUESTOES_INVERTIDAS } from './ipip';
     { id: 14, texto: 'Acredito na importância da arte', invertida: false, faceta: 'O2' },
     { id: 15, texto: 'Experimento minhas emoções intensamente', invertida: false, faceta: 'O3' },
     { id: 16, texto: 'Prefiro rotina a novidade', invertida: true, faceta: 'O4' },
-    { id: 17, texto: 'Tendem a votar em candidatos liberais/progressistas', invertida: false, faceta: 'O5' },
+    { id: 17, texto: 'Tendo a votar em candidatos liberais/progressistas', invertida: false, faceta: 'O5' },
     { id: 18, texto: 'Acredito que não existe certo ou errado absoluto', invertida: false, faceta: 'O6' },
     
     // AMABILIDADE (A1-A6)
