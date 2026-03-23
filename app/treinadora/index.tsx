@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
   import {
     View,
     Text,
@@ -11,9 +11,11 @@ import { useState, useEffect } from 'react';
     RefreshControl,
   } from 'react-native';
   import { useRouter } from 'expo-router';
+  import * as Clipboard from 'expo-clipboard';
   import { useAuth } from '@/lib/supabase/useAuth';
   import { supabase } from '@/lib/supabase/client';
   import { COLORS } from '@/constants/colors';
+  import { useMeusCodigos } from '@/hooks/useMeusCodigos';
 
   interface Treinadora {
     id: string;
@@ -39,12 +41,22 @@ import { useState, useEffect } from 'react';
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [gerandoCodigo, setGerandoCodigo] = useState(false);
+    const [ultimoCodigoGerado, setUltimoCodigoGerado] = useState<string | null>(null);
+    const [ultimoCodigoValidoAte, setUltimoCodigoValidoAte] = useState<string | null>(null);
+    const [codigoGeradoCopiado, setCodigoGeradoCopiado] = useState(false);
+    const { data: meusCodigosData, refetch: refetchMeusCodigos } = useMeusCodigos(treinadora?.id);
 
-    useEffect(() => {
-      carregarDados();
-    }, [user]);
+    const copyToClipboard = async (text: string): Promise<boolean> => {
+      try {
+        await Clipboard.setStringAsync(text);
+        return true;
+      } catch (error) {
+        console.warn('Erro ao copiar codigo:', error);
+        return false;
+      }
+    };
 
-    const carregarDados = async () => {
+    const carregarDados = useCallback(async () => {
       if (!user) return;
 
       try {
@@ -157,11 +169,27 @@ import { useState, useEffect } from 'react';
         setLoading(false);
         setRefreshing(false);
       }
-    };
+    }, [user]);
+
+    useEffect(() => {
+      carregarDados();
+    }, [carregarDados]);
 
     const onRefresh = () => {
       setRefreshing(true);
       carregarDados();
+      refetchMeusCodigos();
+    };
+
+    const copiarUltimoCodigoGerado = async () => {
+      if (!ultimoCodigoGerado) return;
+
+      const success = await copyToClipboard(ultimoCodigoGerado);
+      if (success) {
+        setCodigoGeradoCopiado(true);
+      } else {
+        Alert.alert('Erro', 'Nao foi possivel copiar o codigo. Tente novamente.');
+      }
     };
 
     const gerarCodigo = async () => {
@@ -219,16 +247,15 @@ import { useState, useEffect } from 'react';
         }
 
         setTreinadora({ ...treinadora, creditos: treinadora.creditos - 1 });
+        await refetchMeusCodigos();
+        setUltimoCodigoGerado(codigoGerado);
+        setUltimoCodigoValidoAte(validoAte.toLocaleDateString('pt-BR'));
+        setCodigoGeradoCopiado(false);
 
         Alert.alert(
           'Código gerado!',
-          `Código: ${codigoGerado}\n\nVálido até: ${validoAte.toLocaleDateString('pt-BR')}\n\nCompartilhe este código com seu cliente.`,
-          [
-            { text: 'Copiar Código', onPress: () => {
-              console.log('Código copiado:', codigoGerado);
-            }},
-            { text: 'OK' }
-          ]
+          `Código: ${codigoGerado}\n\nVálido até: ${validoAte.toLocaleDateString('pt-BR')}\n\nUse o cartão abaixo para copiar e compartilhar com seu cliente.`,
+          [{ text: 'OK' }]
         );
       } catch (error: any) {
         console.error('Erro ao gerar código:', error);
@@ -287,6 +314,8 @@ import { useState, useEffect } from 'react';
       completo: 'Completo',
     };
 
+    const codigosAtivos = meusCodigosData?.total ?? 0;
+
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -307,8 +336,9 @@ import { useState, useEffect } from 'react';
         >
           <View style={styles.creditCard}>
             <View style={styles.creditInfo}>
-              <Text style={styles.creditLabel}>Créditos Disponíveis</Text>
+              <Text style={styles.creditLabel}>Saldo de Créditos</Text>
               <Text style={styles.creditValue}>{treinadora.creditos}</Text>
+              <Text style={styles.creditSecondaryLabel}>Códigos Ativos: {codigosAtivos}</Text>
             </View>
             <TouchableOpacity
               style={[styles.generateButton, gerandoCodigo && styles.buttonDisabled]}
@@ -323,6 +353,28 @@ import { useState, useEffect } from 'react';
             </TouchableOpacity>
           </View>
 
+          {ultimoCodigoGerado && (
+            <View style={styles.codigoGeradoCard}>
+              <Text style={styles.codigoGeradoTitle}>Ultimo codigo gerado</Text>
+              <Text style={styles.codigoGeradoValue}>{ultimoCodigoGerado}</Text>
+              <Text style={styles.codigoGeradoValidade}>
+                Valido ate: {ultimoCodigoValidoAte}
+              </Text>
+
+              <TouchableOpacity
+                style={[
+                  styles.codigoGeradoCopyButton,
+                  codigoGeradoCopiado && styles.codigoGeradoCopyButtonSuccess,
+                ]}
+                onPress={copiarUltimoCodigoGerado}
+              >
+                <Text style={styles.codigoGeradoCopyButtonText}>
+                  {codigoGeradoCopiado ? 'Copiado!' : 'Copiar Codigo'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* NOVO: Botão Meus Códigos */}
           <TouchableOpacity
             style={styles.meusCodigosButton}
@@ -331,7 +383,7 @@ import { useState, useEffect } from 'react';
             <View style={styles.meusCodigosContent}>
               <Text style={styles.meusCodigosTitle}>🎟️ Meus Códigos</Text>
               <Text style={styles.meusCodigosSubtitle}>
-                Ver todos os códigos disponíveis
+                {codigosAtivos} ativo{codigosAtivos !== 1 ? 's' : ''} para compartilhar
               </Text>
             </View>
             <Text style={styles.meusCodigosArrow}>→</Text>
@@ -461,6 +513,13 @@ import { useState, useEffect } from 'react';
       color: COLORS.white,
       marginTop: 8,
     },
+    creditSecondaryLabel: {
+      marginTop: 6,
+      fontSize: 14,
+      color: COLORS.creamLight,
+      opacity: 0.95,
+      fontWeight: '600' as const,
+    },
     generateButton: {
       backgroundColor: COLORS.dark1,
       paddingVertical: 14,
@@ -474,6 +533,52 @@ import { useState, useEffect } from 'react';
     },
     buttonDisabled: {
       opacity: 0.7,
+    },
+    codigoGeradoCard: {
+      marginHorizontal: 24,
+      marginTop: -8,
+      marginBottom: 24,
+      padding: 20,
+      backgroundColor: COLORS.cardBg,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: COLORS.cardBorder,
+    },
+    codigoGeradoTitle: {
+      fontSize: 14,
+      color: COLORS.textSecondary,
+      marginBottom: 8,
+      fontWeight: '600' as const,
+    },
+    codigoGeradoValue: {
+      fontSize: 22,
+      color: COLORS.accent,
+      fontWeight: 'bold' as const,
+      letterSpacing: 1,
+      marginBottom: 8,
+      fontFamily: 'monospace',
+    },
+    codigoGeradoValidade: {
+      fontSize: 13,
+      color: COLORS.textMuted,
+      marginBottom: 14,
+    },
+    codigoGeradoCopyButton: {
+      backgroundColor: COLORS.dark2,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: COLORS.cardBorder,
+    },
+    codigoGeradoCopyButtonSuccess: {
+      backgroundColor: COLORS.success,
+      borderColor: COLORS.success,
+    },
+    codigoGeradoCopyButtonText: {
+      color: COLORS.cream,
+      fontSize: 15,
+      fontWeight: '700' as const,
     },
     section: {
       paddingHorizontal: 24,

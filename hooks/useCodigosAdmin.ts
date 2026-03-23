@@ -12,7 +12,7 @@ const CODIGOS_ADMIN_QUERY_KEY = ['admin', 'codigos'] as const;
 
 interface UseCodigosAdminOptions {
   enabled?: boolean;
-  apenasUsados?: boolean | null;
+  filtroStatus?: 'todos' | 'usados' | 'ativos';
   treinadoraId?: string | null;
 }
 
@@ -20,7 +20,7 @@ interface UseCodigosAdminOptions {
  * Busca todos os códigos com informações da treinadora e cliente
  */
 async function fetchCodigosAdmin(
-  apenasUsados: boolean | null = null,
+  filtroStatus: 'todos' | 'usados' | 'ativos' = 'todos',
   treinadoraId: string | null = null
 ): Promise<CodigoAdmin[]> {
   console.log('[useCodigosAdmin] Iniciando busca de códigos...');
@@ -54,11 +54,11 @@ async function fetchCodigosAdmin(
     `)
     .order('created_at', { ascending: false });
 
-  // Filtra por status se especificado
-  if (apenasUsados === true) {
+  // Filtra por status semântico
+  if (filtroStatus === 'usados') {
     query = query.eq('usado', true);
-  } else if (apenasUsados === false) {
-    query = query.eq('usado', false);
+  } else if (filtroStatus === 'ativos') {
+    query = query.eq('usado', false).gt('valido_ate', new Date().toISOString());
   }
 
   // Filtra por treinadora se especificado
@@ -143,12 +143,12 @@ async function fetchCodigosAdmin(
  * Hook para listar códigos (visão admin)
  */
 export function useCodigosAdmin(options: UseCodigosAdminOptions = {}) {
-  const { enabled = true, apenasUsados = null, treinadoraId = null } = options;
+  const { enabled = true, filtroStatus = 'todos', treinadoraId = null } = options;
   const queryClient = useQueryClient();
 
   const query = useQuery<CodigoAdmin[], Error>({
-    queryKey: [...CODIGOS_ADMIN_QUERY_KEY, { apenasUsados, treinadoraId }],
-    queryFn: () => fetchCodigosAdmin(apenasUsados, treinadoraId),
+    queryKey: [...CODIGOS_ADMIN_QUERY_KEY, { filtroStatus, treinadoraId }],
+    queryFn: () => fetchCodigosAdmin(filtroStatus, treinadoraId),
     enabled,
     staleTime: 2 * 60 * 1000, // 2 minutos
     retry: (failureCount, error) => {
@@ -180,9 +180,9 @@ export function useCodigosAdmin(options: UseCodigosAdminOptions = {}) {
   /**
    * Filtra códigos por status
    */
-  const filtrarPorStatus = (usados: boolean | null) => {
+  const filtrarPorStatus = (status: 'todos' | 'usados' | 'ativos') => {
     queryClient.invalidateQueries({ 
-      queryKey: [...CODIGOS_ADMIN_QUERY_KEY, { apenasUsados: usados, treinadoraId }] 
+      queryKey: [...CODIGOS_ADMIN_QUERY_KEY, { filtroStatus: status, treinadoraId }] 
     });
   };
 
@@ -191,7 +191,7 @@ export function useCodigosAdmin(options: UseCodigosAdminOptions = {}) {
    */
   const filtrarPorTreinadora = (id: string | null) => {
     queryClient.invalidateQueries({ 
-      queryKey: [...CODIGOS_ADMIN_QUERY_KEY, { apenasUsados, treinadoraId: id }] 
+      queryKey: [...CODIGOS_ADMIN_QUERY_KEY, { filtroStatus, treinadoraId: id }] 
     });
   };
 

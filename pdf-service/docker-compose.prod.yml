@@ -1,0 +1,64 @@
+# ============================================
+# Docker Compose - Produção (EasyPanel)
+# ============================================
+# Este arquivo é otimizado para deploy no EasyPanel
+# Use: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  pdf-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: decifra-pdf-api
+    restart: always
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GOTENBERG_URL=http://gotenberg:3000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENABLE_STORAGE_UPLOAD=${ENABLE_STORAGE_UPLOAD:-true}
+      - SUPABASE_STORAGE_BUCKET=${SUPABASE_STORAGE_BUCKET:-pdfs}
+      - STORAGE_PUBLIC_URL=${STORAGE_PUBLIC_URL}
+      - MAX_REQUESTS_PER_MINUTE=${MAX_REQUESTS_PER_MINUTE:-10}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    depends_on:
+      - gotenberg
+    networks:
+      - pdf-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: decifra-gotenberg
+    restart: always
+    expose:
+      - "3000"
+    command:
+      - "gotenberg"
+      - "--api-port=3000"
+      - "--api-timeout=60s"
+      - "--chromium-auto-start=true"
+      - "--chromium-restart-after=100"
+      - "--chromium-max-queue-size=10"
+      - "--chromium-allow-list=file:///tmp/.*"
+      - "--chromium-max-processes=4"
+    networks:
+      - pdf-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  pdf-network:
+    driver: bridge

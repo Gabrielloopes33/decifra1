@@ -1,15 +1,10 @@
+import { FACETAS } from '@/constants/ipip';
+
 /**
  * Protocolos de Intervenção - DECIFRA
  * 
- * 15 protocolos prioritários para o MVP
+ * 90 protocolos no total (30 facetas x 3 tipos)
  * Cada faceta tem 3 protocolos: A (Alto), B (Baixo), C (Médio/Ajuste)
- * 
- * Facetas incluídas:
- * - N1 (Ansiedade): Alta prioridade
- * - N6 (Vulnerabilidade): Alta prioridade  
- * - N2 (Raiva): Alta prioridade
- * - E1 (Cordialidade): Média prioridade
- * - E3 (Assertividade): Média prioridade
  */
 
 export interface Exercicio {
@@ -586,7 +581,7 @@ const PROTOCOLO_E3_C: Protocolo = {
 // EXPORT
 // ============================================
 
-export const PROTOCOLOS: Record<string, Protocolo> = {
+const PROTOCOLOS_BASE: Record<string, Protocolo> = {
   // N1 - Ansiedade
   'N1-A': PROTOCOLO_N1_A,
   'N1-B': PROTOCOLO_N1_B,
@@ -613,20 +608,135 @@ export const PROTOCOLOS: Record<string, Protocolo> = {
   'E3-C': PROTOCOLO_E3_C,
 };
 
+function getTipoConfig(tipo: 'alto' | 'baixo' | 'medio') {
+  if (tipo === 'alto') {
+    return {
+      sufixo: 'A',
+      tipoLabel: 'Polo Alto',
+      titulo: 'Regulação do Polo Alto',
+      subtitulo: 'Canalizar intensidade com equilíbrio',
+      objetivo: 'Reduzir excessos comportamentais e ampliar autocontrole em situações críticas.',
+      descricao: 'Protocolo focado em reduzir ativação excessiva e construir estratégias práticas de autorregulação.',
+      icon: 'trending-up',
+      cor: '#C4785A',
+    };
+  }
+
+  if (tipo === 'baixo') {
+    return {
+      sufixo: 'B',
+      tipoLabel: 'Polo Baixo',
+      titulo: 'Desenvolvimento do Polo Baixo',
+      subtitulo: 'Fortalecer expressão e repertório',
+      objetivo: 'Expandir recursos comportamentais e aumentar respostas adaptativas em contextos relevantes.',
+      descricao: 'Protocolo voltado para ativar competências subutilizadas e ampliar repertório de ação.',
+      icon: 'target',
+      cor: '#4A90A4',
+    };
+  }
+
+  return {
+    sufixo: 'C',
+    tipoLabel: 'Ajuste Fino',
+    titulo: 'Ajuste e Manutenção',
+    subtitulo: 'Consolidar estabilidade comportamental',
+    objetivo: 'Preservar ganhos atuais e prevenir regressões por meio de práticas consistentes.',
+    descricao: 'Protocolo de manutenção para fortalecer consistência, autoconsciência e estabilidade no dia a dia.',
+    icon: 'shield',
+    cor: '#9B59B6',
+  };
+}
+
+function getCorPorFator(fator: Protocolo['fator']): string {
+  const mapa: Record<Protocolo['fator'], string> = {
+    N: '#C4785A',
+    E: '#E67E22',
+    O: '#8E44AD',
+    A: '#16A085',
+    C: '#2980B9',
+  };
+  return mapa[fator];
+}
+
+function criarProtocoloPadrao(faceta: string, facetaNome: string, tipo: 'alto' | 'baixo' | 'medio'): Protocolo {
+  const fator = faceta[0] as Protocolo['fator'];
+  const cfg = getTipoConfig(tipo);
+  const codigo = `${faceta}-${cfg.sufixo}`;
+
+  return {
+    codigo,
+    faceta,
+    facetaNome,
+    fator,
+    tipo,
+    tipoLabel: cfg.tipoLabel,
+    titulo: `${cfg.titulo} - ${facetaNome}`,
+    subtitulo: cfg.subtitulo,
+    objetivo: cfg.objetivo,
+    descricao: cfg.descricao,
+    exercicios: [
+      {
+        titulo: 'Microprática Diária',
+        descricao: `Aplicar uma microação de ${facetaNome.toLowerCase()} com foco em consistência e autoobservação.`,
+        frequencia: 'Diária',
+        duracao: '5-10 minutos',
+      },
+      {
+        titulo: 'Diário de Evidências',
+        descricao: 'Registrar gatilhos, decisões e resultados para ajustar o plano de ação semanalmente.',
+        frequencia: '3x por semana',
+        duracao: '10 minutos',
+      },
+      {
+        titulo: 'Revisão de Progresso',
+        descricao: 'Revisar avanços, barreiras e próximos passos com foco em autonomia comportamental.',
+        frequencia: 'Semanal',
+        duracao: '15 minutos',
+      },
+    ],
+    duracao: '2-4 semanas',
+    recursos: ['Caderno de acompanhamento', 'Checklist semanal'],
+    icon: cfg.icon,
+    cor: getCorPorFator(fator),
+  };
+}
+
+const PROTOCOLOS_GERADOS: Record<string, Protocolo> = {};
+
+for (const [faceta, facetaNome] of Object.entries(FACETAS)) {
+  for (const tipo of ['alto', 'baixo', 'medio'] as const) {
+    const sufixo = tipo === 'alto' ? 'A' : tipo === 'baixo' ? 'B' : 'C';
+    const codigo = `${faceta}-${sufixo}`;
+
+    if (!PROTOCOLOS_BASE[codigo]) {
+      PROTOCOLOS_GERADOS[codigo] = criarProtocoloPadrao(faceta, facetaNome, tipo);
+    }
+  }
+}
+
+export const PROTOCOLOS: Record<string, Protocolo> = {
+  ...PROTOCOLOS_BASE,
+  ...PROTOCOLOS_GERADOS,
+};
+
 // Lista de todos os protocolos
 export const TODOS_PROTOCOLOS = Object.values(PROTOCOLOS);
 
 // Protocolos por fator
-export const PROTOCOLOS_POR_FATOR = {
-  N: ['N1-A', 'N1-B', 'N1-C', 'N6-A', 'N6-B', 'N6-C', 'N2-A', 'N2-B', 'N2-C'],
-  E: ['E1-A', 'E1-B', 'E1-C', 'E3-A', 'E3-B', 'E3-C'],
+export const PROTOCOLOS_POR_FATOR: Record<Protocolo['fator'], string[]> = {
+  N: Object.keys(PROTOCOLOS).filter(codigo => codigo.startsWith('N')),
+  E: Object.keys(PROTOCOLOS).filter(codigo => codigo.startsWith('E')),
+  O: Object.keys(PROTOCOLOS).filter(codigo => codigo.startsWith('O')),
+  A: Object.keys(PROTOCOLOS).filter(codigo => codigo.startsWith('A')),
+  C: Object.keys(PROTOCOLOS).filter(codigo => codigo.startsWith('C')),
 };
 
 // Protocolos por faceta
-export const PROTOCOLOS_POR_FACETA: Record<string, string[]> = {
-  'N1': ['N1-A', 'N1-B', 'N1-C'],
-  'N6': ['N6-A', 'N6-B', 'N6-C'],
-  'N2': ['N2-A', 'N2-B', 'N2-C'],
-  'E1': ['E1-A', 'E1-B', 'E1-C'],
-  'E3': ['E3-A', 'E3-B', 'E3-C'],
-};
+export const PROTOCOLOS_POR_FACETA: Record<string, string[]> = Object.fromEntries(
+  Object.keys(FACETAS).map((faceta) => [
+    faceta,
+    Object.keys(PROTOCOLOS)
+      .filter(codigo => codigo.startsWith(`${faceta}-`))
+      .sort(),
+  ])
+);

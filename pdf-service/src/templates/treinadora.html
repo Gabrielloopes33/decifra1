@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório Completo - {{cliente.nome}}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #2D1518;
+      color: #F5F0E8;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm;
+      margin: 0 auto;
+      background-color: #2D1518;
+      page-break-after: always;
+    }
+
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #C4785A;
+      margin-bottom: 25px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .logo {
+      width: 60px;
+      height: 60px;
+      background: rgba(196, 120, 90, 0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #C4785A;
+      font-size: 28px;
+      color: #C4785A;
+      font-weight: 700;
+    }
+
+    .header-title h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #F5F0E8;
+    }
+
+    .header-title p {
+      font-size: 13px;
+      color: #C4785A;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .confidencial {
+      font-size: 11px;
+      color: #C4785A;
+      border: 1px solid #C4785A;
+      padding: 4px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Info Section */
+    .info-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+
+    .info-box {
+      background: rgba(196, 120, 90, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid rgba(196, 120, 90, 0.3);
+    }
+
+    .info-box h3 {
+      font-size: 12px;
+      color: #C4785A;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(245, 240, 232, 0.1);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .info-value {
+      font-size: 13px;
+      font-weight: 500;
+      color: #F5F0E8;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #C4785A;
+      margin: 25px 0 15px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(196, 120, 90, 0.3);
+    }
+
+    /* Fatores Grid - Compacto */
+    .fatores-compact {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .fator-compact {
+      background: rgba(245, 240, 232, 0.05);
+      border-radius: 10px;
+      padding: 15px 10px;
+      text-align: center;
+      border-top: 3px solid;
+    }
+
+    .fator-sigla {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #2D1518;
+      margin: 0 auto 10px;
+    }
+
+    .fator-nome {
+      font-size: 12px;
+      font-weight: 600;
+      color: #F5F0E8;
+      margin-bottom: 5px;
+    }
+
+    .fator-score {
+      font-size: 24px;
+      font-weight: 700;
+      color: #F5F0E8;
+    }
+
+    .fator-classificacao {
+      font-size: 11px;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(245, 240, 232, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+    }
+
+    /* Facetas Table */
+    .facetas-section {
+      margin-bottom: 25px;
+    }
+
+    .fator-grupo {
+      margin-bottom: 20px;
+    }
+
+    .fator-grupo-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 15px;
+      background: rgba(196, 120, 90, 0.15);
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .fator-grupo-sigla {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: #2D1518;
+    }
+
+    .fator-grupo-nome {
+      font-size: 14px;
+      font-weight: 600;
+      color: #F5F0E8;
+    }
+
+    .facetas-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .facetas-table th {
+      text-align: left;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(196, 120, 90, 0.3);
+    }
+
+    .facetas-table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(245, 240, 232, 0.05);
+    }
+
+    .facetas-table tr:hover {
+      background: rgba(245, 240, 232, 0.02);
+    }
+
+    .faceta-codigo {
+      font-family: monospace;
+      font-size: 12px;
+      color: #C4785A;
+      font-weight: 600;
+    }
+
+    .faceta-nome {
+      font-size: 13px;
+      color: #F5F0E8;
+    }
+
+    .faceta-score {
+      font-size: 14px;
+      font-weight: 600;
+      color: #F5F0E8;
+    }
+
+    .faceta-percentil {
+      width: 100px;
+    }
+
+    .faceta-classificacao {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .class-baixo {
+      background: rgba(123, 158, 135, 0.2);
+      color: #7B9E87;
+    }
+
+    .class-medio {
+      background: rgba(212, 165, 116, 0.2);
+      color: #D4A574;
+    }
+
+    .class-alto {
+      background: rgba(196, 120, 90, 0.2);
+      color: #C4785A;
+    }
+
+    /* Protocolos Section */
+    .protocolos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .protocolo-card {
+      background: rgba(245, 240, 232, 0.03);
+      border-radius: 10px;
+      padding: 15px;
+      border: 1px solid rgba(196, 120, 90, 0.2);
+    }
+
+    .protocolo-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .prioridade-badge {
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .prioridade-1 {
+      background: #C4785A;
+      color: #2D1518;
+    }
+
+    .prioridade-2 {
+      background: #D4A574;
+      color: #2D1518;
+    }
+
+    .prioridade-3 {
+      background: #7B9E87;
+      color: #2D1518;
+    }
+
+    .faceta-tag {
+      font-size: 11px;
+      color: #888;
+    }
+
+    .protocolo-titulo {
+      font-size: 14px;
+      font-weight: 600;
+      color: #F5F0E8;
+      margin-bottom: 8px;
+    }
+
+    .protocolo-descricao {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .exercicios-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .exercicios-list li {
+      padding: 4px 0 4px 18px;
+      position: relative;
+      font-size: 11px;
+      color: #bbb;
+    }
+
+    .exercicios-list li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #C4785A;
+      font-size: 10px;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(196, 120, 90, 0.2);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+    }
+
+    .footer-brand {
+      font-weight: 600;
+      color: #C4785A;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #2D1518;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      .page {
+        width: 100%;
+        padding: 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Página 1: Resumo Executivo -->
+  <div class="page">
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">Á</div>
+        <div class="header-title">
+          <h1>Relatório de Personalidade</h1>
+          <p>Versão Profissional - Uso Exclusivo da Treinadora</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <span class="confidencial">Confidencial</span>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="info-box">
+        <h3>Informações do Cliente</h3>
+        <div class="info-row">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{cliente.nome}}</span>
+        </div>
+        {{#if cliente.email}}
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{cliente.email}}</span>
+        </div>
+        {{/if}}
+        <div class="info-row">
+          <span class="info-label">Data da Avaliação</span>
+          <span class="info-value">{{formatDate cliente.dataAvaliacao}}</span>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <h3>Informações da Treinadora</h3>
+        <div class="info-row">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{treinadora.nome}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{treinadora.email}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Gerado em</span>
+          <span class="info-value">{{formatDate dataGeracao}}</span>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Visão Geral - Cinco Grandes Fatores</h2>
+    
+    <div class="fatores-compact">
+      {{#each resultado.scoresFatores}}
+      <div class="fator-compact" style="border-top-color: {{this.cor}};">
+        <div class="fator-sigla" style="background-color: {{this.cor}};">
+          {{this.sigla}}
+        </div>
+        <div class="fator-nome">{{this.nome}}</div>
+        <div class="fator-score">{{formatNumber this.score}}</div>
+        <div class="fator-classificacao">{{this.classificacao}}</div>
+        <div class="progress-container">
+          <div class="progress-fill" style="width: {{this.percentil}}%; background-color: {{this.cor}};"></div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <h2 class="section-title">Protocolos Recomendados (Prioridade)</h2>
+    
+    <div class="protocolos-grid">
+      {{#each protocolos}}
+      <div class="protocolo-card">
+        <div class="protocolo-header">
+          <span class="prioridade-badge prioridade-{{this.prioridade}}">
+            P{{this.prioridade}}
+          </span>
+          <span class="faceta-tag">{{this.faceta}}</span>
+        </div>
+        <h3 class="protocolo-titulo">{{this.titulo}}</h3>
+        <p class="protocolo-descricao">{{this.descricao}}</p>
+        <ul class="exercicios-list">
+          {{#each this.exercicios}}
+          <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+      {{/each}}
+    </div>
+
+    <div class="footer">
+      <span class="footer-brand">Ártio - Assessment de Personalidade</span>
+      <span>Documento confidencial - Uso profissional exclusivo</span>
+    </div>
+  </div>
+
+  <!-- Página 2-3: Detalhamento das 30 Facetas -->
+  <div class="page">
+    <h2 class="section-title">Análise Detalhada - 30 Facetas</h2>
+
+    {{!-- Agrupar facetas por fator --}}
+    {{#each (array 'N' 'E' 'O' 'A' 'C') as |fatorSigla|}}
+      {{#with (lookup ../this 'fatorData')}}
+      <div class="fator-grupo">
+        <div class="fator-grupo-header">
+          <div class="fator-grupo-sigla" style="background-color: {{fatorCor fatorSigla}};">
+            {{fatorSigla}}
+          </div>
+          <span class="fator-grupo-nome">{{fatorNome fatorSigla}}</span>
+        </div>
+        
+        <table class="facetas-table">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Faceta</th>
+              <th>Score</th>
+              <th>Percentil</th>
+              <th>Classificação</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each ../resultado.scoresFacetas}}
+            {{#if (eq this.fator fatorSigla)}}
+            <tr>
+              <td><span class="faceta-codigo">{{this.codigo}}</span></td>
+              <td><span class="faceta-nome">{{this.nome}}</span></td>
+              <td><span class="faceta-score">{{formatNumber this.score}}</span></td>
+              <td class="faceta-percentil">
+                <div class="progress-container">
+                  <div class="progress-fill" style="width: {{this.percentil}}%; background-color: {{fatorCor fatorSigla}};"></div>
+                </div>
+              </td>
+              <td>
+                <span class="faceta-classificacao class-{{classSlug this.classificacao}}">
+                  {{this.classificacao}}
+                </span>
+              </td>
+            </tr>
+            {{/if}}
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+      {{/with}}
+    {{/each}}
+  </div>
+</body>
+</html>

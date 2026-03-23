@@ -17,7 +17,7 @@ export interface DashboardStats {
   totalClientes: number;
   totalClientesAtivos: number;
   totalClientesCompletos: number;
-  codigosDisponiveis: number;
+  codigosAtivos: number;
 }
 
 export interface TreinadoraAdmin {

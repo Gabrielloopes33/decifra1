@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relatório de Personalidade - {{cliente.nome}}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #2D1518;
+      color: #F5F0E8;
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 20mm;
+      margin: 0 auto;
+      background-color: #2D1518;
+      page-break-after: always;
+    }
+
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding-bottom: 30px;
+      border-bottom: 2px solid #C4785A;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      width: 120px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      color: #F5F0E8;
+      margin-bottom: 10px;
+    }
+
+    .header .subtitle {
+      font-size: 16px;
+      color: #C4785A;
+      font-weight: 400;
+    }
+
+    /* Info Section */
+    .info-section {
+      background: rgba(196, 120, 90, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(196, 120, 90, 0.3);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #C4785A;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      font-weight: 500;
+      color: #F5F0E8;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #C4785A;
+      margin: 30px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(196, 120, 90, 0.3);
+    }
+
+    /* Fatores Grid */
+    .fatores-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .fator-card {
+      background: rgba(245, 240, 232, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid;
+    }
+
+    .fator-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .fator-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .fator-sigla {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #2D1518;
+    }
+
+    .fator-titulo {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .fator-nome {
+      font-size: 18px;
+      font-weight: 600;
+      color: #F5F0E8;
+    }
+
+    .fator-classificacao {
+      font-size: 13px;
+      color: #C4785A;
+      margin-top: 2px;
+    }
+
+    .fator-score {
+      text-align: right;
+    }
+
+    .score-valor {
+      font-size: 28px;
+      font-weight: 700;
+      color: #F5F0E8;
+    }
+
+    .score-label {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(245, 240, 232, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    /* Protocolos Section */
+    .protocolos-intro {
+      font-size: 15px;
+      color: #F5F0E8;
+      margin-bottom: 25px;
+      line-height: 1.8;
+    }
+
+    .protocolo-card {
+      background: rgba(245, 240, 232, 0.03);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(196, 120, 90, 0.2);
+    }
+
+    .protocolo-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .prioridade-badge {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .prioridade-1 {
+      background: #C4785A;
+      color: #2D1518;
+    }
+
+    .prioridade-2 {
+      background: #D4A574;
+      color: #2D1518;
+    }
+
+    .prioridade-3 {
+      background: #7B9E87;
+      color: #2D1518;
+    }
+
+    .faceta-tag {
+      font-size: 12px;
+      color: #888;
+    }
+
+    .protocolo-titulo {
+      font-size: 17px;
+      font-weight: 600;
+      color: #F5F0E8;
+      margin-bottom: 10px;
+    }
+
+    .protocolo-descricao {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .exercicios-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #C4785A;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .exercicios-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .exercicios-list li {
+      padding: 8px 0 8px 25px;
+      position: relative;
+      font-size: 13px;
+      color: #ddd;
+      border-bottom: 1px solid rgba(245, 240, 232, 0.05);
+    }
+
+    .exercicios-list li:last-child {
+      border-bottom: none;
+    }
+
+    .exercicios-list li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #C4785A;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(196, 120, 90, 0.2);
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .footer-logo {
+      font-weight: 600;
+      color: #C4785A;
+      margin-bottom: 5px;
+    }
+
+    /* Legend Page */
+    .legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: rgba(245, 240, 232, 0.03);
+      border-radius: 8px;
+    }
+
+    .legend-sigla {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      color: #2D1518;
+      flex-shrink: 0;
+    }
+
+    .legend-content h4 {
+      font-size: 16px;
+      color: #F5F0E8;
+      margin-bottom: 5px;
+    }
+
+    .legend-content p {
+      font-size: 13px;
+      color: #aaa;
+      line-height: 1.5;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #2D1518;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      
+      .page {
+        width: 100%;
+        padding: 15mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Página 1: Capa e Resumo -->
+  <div class="page">
+    <div class="header">
+      <!-- Logo placeholder - será substituído pela imagem real -->
+      <div style="width: 120px; height: 120px; margin: 0 auto 20px; background: rgba(196, 120, 90, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #C4785A;">
+        <span style="font-size: 48px; color: #C4785A;">Á</span>
+      </div>
+      <h1>Relatório de Personalidade</h1>
+      <p class="subtitle">Avaliação baseada no modelo IPIP-NEO-120</p>
+    </div>
+
+    <div class="info-section">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Nome</span>
+          <span class="info-value">{{cliente.nome}}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Data da Avaliação</span>
+          <span class="info-value">{{formatDate cliente.dataAvaliacao}}</span>
+        </div>
+        {{#if cliente.email}}
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{cliente.email}}</span>
+        </div>
+        {{/if}}
+        {{#if treinadora}}
+        <div class="info-item">
+          <span class="info-label">Treinadora</span>
+          <span class="info-value">{{treinadora.nome}}</span>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <h2 class="section-title">Os Cinco Grandes Fatores</h2>
+    
+    <div class="fatores-grid">
+      {{#each resultado.scoresFatores}}
+      <div class="fator-card" style="border-left-color: {{this.cor}};">
+        <div class="fator-header">
+          <div class="fator-info">
+            <div class="fator-sigla" style="background-color: {{this.cor}};">
+              {{this.sigla}}
+            </div>
+            <div class="fator-titulo">
+              <span class="fator-nome">{{this.nome}}</span>
+              <span class="fator-classificacao">{{this.classificacao}}</span>
+            </div>
+          </div>
+          <div class="fator-score">
+            <div class="score-valor">{{formatNumber this.score}}</div>
+            <div class="score-label">score</div>
+          </div>
+        </div>
+        <div class="progress-container">
+          <div class="progress-fill" style="width: {{this.percentil}}%; background-color: {{this.cor}};"></div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+
+  <!-- Página 2: Protocolos Recomendados -->
+  <div class="page">
+    <h2 class="section-title">Protocolos de Desenvolvimento</h2>
+    
+    <p class="protocolos-intro">
+      Com base nos seus resultados, preparamos recomendações personalizadas para auxiliar no seu desenvolvimento pessoal. 
+      Esses protocolos incluem exercícios práticos baseados em evidências científicas.
+    </p>
+
+    {{#each protocolos}}
+    <div class="protocolo-card">
+      <div class="protocolo-header">
+        <span class="prioridade-badge prioridade-{{this.prioridade}}">
+          Prioridade {{this.prioridade}}
+        </span>
+        <span class="faceta-tag">Faceta {{this.faceta}}</span>
+      </div>
+      <h3 class="protocolo-titulo">{{this.titulo}}</h3>
+      <p class="protocolo-descricao">{{this.descricao}}</p>
+      
+      <div class="exercicios-title">Exercícios recomendados:</div>
+      <ul class="exercicios-list">
+        {{#each this.exercicios}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    {{/each}}
+
+    <div class="footer">
+      <div class="footer-logo">Ártio</div>
+      <p>Relatório gerado em {{formatDate dataGeracao}}</p>
+      <p>Este relatório é confidencial e destinado ao uso pessoal.</p>
+    </div>
+  </div>
+</body>
+</html>

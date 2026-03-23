@@ -37,7 +37,7 @@ const ADMIN_COLORS = {
 
 export default function CodigosScreen() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterUsados, setFilterUsados] = useState<boolean | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'todos' | 'usados' | 'ativos'>('todos');
   
   // Estados para o modal de geração de códigos
   const [modalVisible, setModalVisible] = useState(false);
@@ -70,7 +70,7 @@ export default function CodigosScreen() {
     isError, 
     refetch,
     filtrarPorStatus 
-  } = useCodigosAdmin({ apenasUsados: filterUsados });
+  } = useCodigosAdmin({ filtroStatus: filterStatus });
   
   const { data: stats } = useDashboardStats();
 
@@ -95,22 +95,14 @@ export default function CodigosScreen() {
     return new Date(validoAte) < new Date();
   };
 
-  const handleFilterChange = (filtro: 'todos' | 'usados' | 'disponiveis') => {
-    switch (filtro) {
-      case 'usados':
-        setFilterUsados(true);
-        break;
-      case 'disponiveis':
-        setFilterUsados(false);
-        break;
-      default:
-        setFilterUsados(null);
-    }
+  const handleFilterChange = (filtro: 'todos' | 'usados' | 'ativos') => {
+    setFilterStatus(filtro);
+    filtrarPorStatus(filtro);
   };
 
   const getFilterLabel = () => {
-    if (filterUsados === true) return 'Usados';
-    if (filterUsados === false) return 'Disponíveis';
+    if (filterStatus === 'usados') return 'Usados';
+    if (filterStatus === 'ativos') return 'Ativos';
     return 'Todos';
   };
 
@@ -228,8 +220,8 @@ export default function CodigosScreen() {
           <Text style={styles.statBoxLabel}>Utilizados</Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statBoxValue}>{stats?.codigosDisponiveis || 0}</Text>
-          <Text style={styles.statBoxLabel}>Disponíveis</Text>
+          <Text style={styles.statBoxValue}>{stats?.codigosAtivos || 0}</Text>
+          <Text style={styles.statBoxLabel}>Ativos</Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statBoxValue}>
@@ -252,10 +244,10 @@ export default function CodigosScreen() {
           />
         </View>
         <TouchableOpacity 
-          style={[styles.filterButton, filterUsados !== null && styles.filterButtonActive]}
-          onPress={() => handleFilterChange(filterUsados === null ? 'usados' : filterUsados === true ? 'disponiveis' : 'todos')}
+          style={[styles.filterButton, filterStatus !== 'todos' && styles.filterButtonActive]}
+          onPress={() => handleFilterChange(filterStatus === 'todos' ? 'usados' : filterStatus === 'usados' ? 'ativos' : 'todos')}
         >
-          <Text style={[styles.filterText, filterUsados !== null && styles.filterTextActive]}>
+          <Text style={[styles.filterText, filterStatus !== 'todos' && styles.filterTextActive]}>
             {getFilterLabel()} ▼
           </Text>
         </TouchableOpacity>

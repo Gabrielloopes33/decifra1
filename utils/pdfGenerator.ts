@@ -8,6 +8,8 @@ import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
 import { FATORES } from '@/constants/ipip';
 import type { FatorKey } from '@/constants/ipip';
+import { getInterpretacao, type Faixa } from '@/constants/interpretacoes';
+import { PROTOCOLOS } from '@/constants/protocolos';
 
 interface FatorScore {
   fator: FatorKey;
@@ -66,6 +68,15 @@ function sanitizarNomeArquivo(nome: string): string {
     .replace(/[^a-zA-Z0-9\s-]/g, '')
     .replace(/\s+/g, '_')
     .substring(0, 50);
+}
+
+function escapeHtml(texto: string): string {
+  return texto
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 export async function gerarPDF(dados: PDFData): Promise<void> {
@@ -161,6 +172,22 @@ function gerarTemplateHTML(dados: PDFData): string {
     resultado.scores_fatores.find(s => s.fator === fator)
   ).filter((s): s is FatorScore => s !== undefined);
 
+  const classificarParaFaixa = (classificacao: string): Faixa => {
+    const normalized = classificacao.toLowerCase().trim();
+    if (normalized.includes('muito') && normalized.includes('baixo')) return 'Muito Baixo';
+    if (normalized.includes('baixo')) return 'Baixo';
+    if (normalized.includes('muito') && normalized.includes('alto')) return 'Muito Alto';
+    if (normalized.includes('alto')) return 'Alto';
+    return 'Médio';
+  };
+
+  const fatorDestaque = [...scoresOrdenados]
+    .sort((a, b) => Math.abs(b.percentil - 50) - Math.abs(a.percentil - 50))[0];
+
+  const interpretacaoDestaque = fatorDestaque
+    ? getInterpretacao(fatorDestaque.fator, classificarParaFaixa(fatorDestaque.classificacao))
+    : null;
+
   // Wrapper com fundo escuro garantido
   const pageBackground = COLORS.vinhoDeep;
   const cardBackground = COLORS.vinhoDark;
@@ -213,17 +240,46 @@ function gerarTemplateHTML(dados: PDFData): string {
 
   // Protocolos
   const protocolosHTML = protocolos.length > 0 
-    ? protocolos.map((p, i) => `
-      <div style="background: ${cardBackground}; border-radius: 14px; padding: 20px; margin-bottom: 14px; border: 1px solid ${COLORS.terracota}60;">
-        <div style="display: flex; align-items: flex-start; gap: 14px;">
-          <div style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: ${i < 3 ? COLORS.terracota : COLORS.vinho}; color: ${COLORS.cream}; border-radius: 50%; font-weight: 700; font-size: 15px; flex-shrink: 0; border: 2px solid ${COLORS.cream}40; font-family: 'Urbanist', sans-serif;">${i + 1}</div>
-          <div style="flex: 1;">
-            <div style="font-weight: 700; color: ${COLORS.cream}; font-size: 16px; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">${p.titulo}</div>
-            <div style="font-size: 14px; color: ${COLORS.creamDark}; line-height: 1.6; font-family: 'Urbanist', sans-serif;">${p.descricao}</div>
+    ? protocolos.map((p, i) => {
+      const protocoloCompleto = PROTOCOLOS[p.id as keyof typeof PROTOCOLOS];
+      const titulo = escapeHtml(protocoloCompleto?.titulo || p.titulo);
+      const objetivo = escapeHtml(protocoloCompleto?.objetivo || 'Objetivo não informado.');
+      const descricao = escapeHtml(protocoloCompleto?.descricao || p.descricao);
+
+      const exercicios = (protocoloCompleto?.exercicios || []).map((exercicio, idx) => {
+        const tituloExercicio = escapeHtml(exercicio.titulo || `Exercício ${idx + 1}`);
+        const descricaoExercicio = escapeHtml(exercicio.descricao || '');
+        const frequencia = escapeHtml(exercicio.frequencia || 'Não informado');
+        const duracao = escapeHtml(exercicio.duracao || 'Não informado');
+
+        return `
+          <div style="margin-bottom: 10px; padding: 10px 12px; border-radius: 8px; background: ${COLORS.vinhoDeep}; border: 1px solid ${COLORS.terracota}40;">
+            <div style="font-size: 13px; font-weight: 700; color: ${COLORS.cream}; margin-bottom: 4px; font-family: 'Urbanist', sans-serif;">${idx + 1}. ${tituloExercicio}</div>
+            <div style="font-size: 12px; color: ${COLORS.creamDark}; line-height: 1.6; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">${descricaoExercicio}</div>
+            <div style="font-size: 11px; color: ${COLORS.terracotaLight}; font-family: 'Urbanist', sans-serif;">Frequência: ${frequencia} | Duração: ${duracao}</div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div style="background: ${cardBackground}; border-radius: 14px; padding: 20px; margin-bottom: 14px; border: 1px solid ${COLORS.terracota}60;">
+          <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px;">
+            <div style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: ${i < 3 ? COLORS.terracota : COLORS.vinho}; color: ${COLORS.cream}; border-radius: 50%; font-weight: 700; font-size: 15px; flex-shrink: 0; border: 2px solid ${COLORS.cream}40; font-family: 'Urbanist', sans-serif;">${i + 1}</div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; color: ${COLORS.cream}; font-size: 16px; margin-bottom: 8px; font-family: 'Urbanist', sans-serif;">${titulo}</div>
+              <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 6px; font-weight: 700; font-family: 'Urbanist', sans-serif;">Objetivo</div>
+              <div style="font-size: 13px; color: ${COLORS.creamDark}; line-height: 1.6; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">${objetivo}</div>
+              <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 6px; font-weight: 700; font-family: 'Urbanist', sans-serif;">Descrição</div>
+              <div style="font-size: 13px; color: ${COLORS.creamDark}; line-height: 1.6; margin-bottom: 12px; font-family: 'Urbanist', sans-serif;">${descricao}</div>
+              ${exercicios ? `
+                <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 8px; font-weight: 700; font-family: 'Urbanist', sans-serif;">Exercícios</div>
+                ${exercicios}
+              ` : ''}
+            </div>
           </div>
         </div>
-      </div>
-    `).join('')
+      `;
+    }).join('')
     : `
       <div style="background: ${cardBackground}; border-radius: 14px; padding: 24px; border: 1px solid ${COLORS.terracota}60; text-align: center;">
         <div style="color: ${COLORS.creamDark}; font-size: 14px; font-style: italic; font-family: 'Urbanist', sans-serif;">Nenhum protocolo recomendado para este perfil.</div>
@@ -249,6 +305,28 @@ function gerarTemplateHTML(dados: PDFData): string {
       </div>
     </div>
   `).join('');
+
+  const interpretacaoHTML = interpretacaoDestaque && fatorDestaque
+    ? `
+      <div style="margin-top: 24px; background: ${cardBackground}; border-radius: 16px; padding: 20px; border: 1px solid ${COLORS.terracota}60;">
+        <div style="font-size: 20px; font-weight: 800; color: ${COLORS.cream}; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">
+          ${isTreinadora ? 'Interpretação Principal' : 'Quem Você É'}
+        </div>
+        <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">
+          Destaque em ${FATORES[fatorDestaque.fator]}
+        </div>
+        <div style="font-size: 16px; font-weight: 700; color: ${COLORS.cream}; margin-bottom: 4px; font-family: 'Urbanist', sans-serif;">
+          ${interpretacaoDestaque.titulo}
+        </div>
+        <div style="font-size: 14px; font-weight: 600; color: ${COLORS.terracota}; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">
+          ${interpretacaoDestaque.subtitulo}
+        </div>
+        <div style="font-size: 14px; color: ${COLORS.creamDark}; line-height: 1.7; font-family: 'Urbanist', sans-serif;">
+          ${interpretacaoDestaque.descricao}
+        </div>
+      </div>
+    `
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -344,6 +422,7 @@ function gerarTemplateHTML(dados: PDFData): string {
         5 Fatores Principais
       </div>
       ${fatoresHTML}
+      ${interpretacaoHTML}
     </div>
     
     <!-- Facetas -->
@@ -366,7 +445,7 @@ function gerarTemplateHTML(dados: PDFData): string {
       ${!isTreinadora ? `
       <div style="margin-top: 20px; padding: 18px; background: ${cardBackground}; border-radius: 14px; border: 1px solid ${COLORS.terracota}60;">
         <div style="font-size: 13px; color: ${COLORS.creamDark}; font-style: italic; line-height: 1.6; font-family: 'Urbanist', sans-serif;">
-          Este é um relatório resumido. Sua treinadora tem acesso a uma análise completa com todas as 30 facetas e protocolos detalhados.
+          Este é um relatório resumido. Sua treinadora tem acesso à análise completa com as 30 facetas e contexto profissional ampliado.
         </div>
       </div>
       ` : ''}

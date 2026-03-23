@@ -77,8 +77,16 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
     console.error('Erro ao buscar clientes completos:', clientesCompletosError);
   }
 
-  // Calcula códigos disponíveis (não usados)
-  const codigosDisponiveis = (totalCodigos || 0) - (totalCodigosUsados || 0);
+  // Códigos ativos: não usados e dentro da validade
+  const { count: totalCodigosAtivos, error: codigosAtivosError } = await supabase
+    .from('codigos')
+    .select('*', { count: 'exact', head: true })
+    .eq('usado', false)
+    .gt('valido_ate', new Date().toISOString());
+
+  if (codigosAtivosError) {
+    console.error('Erro ao buscar códigos ativos:', codigosAtivosError);
+  }
 
   return {
     totalTreinadoras: totalTreinadoras || 0,
@@ -87,7 +95,7 @@ async function fetchDashboardStats(): Promise<DashboardStats> {
     totalClientes: totalClientes || 0,
     totalClientesAtivos: totalClientesAtivos || 0,
     totalClientesCompletos: totalClientesCompletos || 0,
-    codigosDisponiveis: Math.max(0, codigosDisponiveis),
+    codigosAtivos: Math.max(0, totalCodigosAtivos || 0),
   };
 }
 

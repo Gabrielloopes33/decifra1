@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,14 +18,7 @@ import { supabase } from '@/lib/supabase/client';
 import { COLORS_ARTIO, GRADIENTS } from '@/constants/colors-artio';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-
-// Interface para os códigos disponíveis
-interface CodigoDisponivel {
-  id: string;
-  codigo: string;
-  validoAte: string;
-  diasRestantes: number;
-}
+import { useMeusCodigos } from '@/hooks/useMeusCodigos';
 
 // Helper para copiar usando expo-clipboard
 const copyToClipboard = async (text: string): Promise<boolean> => {
@@ -42,11 +35,18 @@ export default function MeusCodigosScreen() {
   const router = useRouter();
   const { user } = useAuth();
   
-  const [codigos, setCodigos] = useState<CodigoDisponivel[]>([]);
   const [treinadoraId, setTreinadoraId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isBuscandoTreinadora, setIsBuscandoTreinadora] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [copiado, setCopiado] = useState<string | null>(null);
+  const {
+    data: meusCodigosData,
+    isLoading: isLoadingCodigos,
+    refetch: refetchCodigos,
+  } = useMeusCodigos(treinadoraId ?? undefined);
+
+  const codigos = meusCodigosData?.disponiveis ?? [];
+  const isLoading = isBuscandoTreinadora || isLoadingCodigos;
 
   // Buscar treinadora ID
   useEffect(() => {
@@ -70,53 +70,18 @@ export default function MeusCodigosScreen() {
         }
       } catch (error) {
         console.error('Erro:', error);
+      } finally {
+        setIsBuscandoTreinadora(false);
       }
     };
     
     buscarTreinadora();
   }, [user]);
 
-  // Buscar códigos disponíveis
-  const carregarCodigos = useCallback(async () => {
-    if (!treinadoraId) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('codigos')
-        .select('id, codigo, valido_ate')
-        .eq('treinadora_id', treinadoraId)
-        .eq('usado', false)
-        .gt('valido_ate', new Date().toISOString())
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-
-      const disponiveis = data?.map((c) => ({
-        id: c.id,
-        codigo: c.codigo,
-        validoAte: c.valido_ate,
-        diasRestantes: Math.ceil(
-          (new Date(c.valido_ate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
-        ),
-      })) || [];
-
-      setCodigos(disponiveis);
-    } catch (error) {
-      console.error('Erro ao carregar códigos:', error);
-      Alert.alert('Erro', 'Não foi possível carregar seus códigos');
-    } finally {
-      setIsLoading(false);
-      setRefreshing(false);
-    }
-  }, [treinadoraId]);
-
-  useEffect(() => {
-    carregarCodigos();
-  }, [carregarCodigos]);
-
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    carregarCodigos();
+    await refetchCodigos();
+    setRefreshing(false);
   };
 
   const copiarCodigo = async (codigo: string) => {
@@ -196,7 +161,7 @@ export default function MeusCodigosScreen() {
             <View style={styles.placeholder} />
           </View>
           <Text style={styles.subtitle}>
-            Você tem {codigos.length} código{codigos.length !== 1 ? 's' : ''} disponível
+            Você tem {codigos.length} código{codigos.length !== 1 ? 's' : ''} ativo{codigos.length !== 1 ? 's' : ''}
           </Text>
         </View>
 

@@ -26,6 +26,21 @@ interface ProtocoloCardProps {
 export function ProtocoloCard({ protocolo, prioridade }: ProtocoloCardProps) {
   const [expandido, setExpandido] = useState(false);
 
+  const formatarExercicioTexto = (exercicio: Protocolo['exercicios'][number]) => {
+    if (typeof exercicio === 'string') {
+      return exercicio;
+    }
+
+    const partes = [
+      exercicio.titulo?.trim(),
+      exercicio.descricao?.trim(),
+      exercicio.frequencia ? `Frequencia: ${exercicio.frequencia}` : '',
+      exercicio.duracao ? `Duracao: ${exercicio.duracao}` : '',
+    ].filter(Boolean);
+
+    return partes.join(' | ');
+  };
+
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     
@@ -112,7 +127,7 @@ export function ProtocoloCard({ protocolo, prioridade }: ProtocoloCardProps) {
             {protocolo.exercicios.map((exercicio, idx) => (
               <View key={idx} style={styles.exercicioItem}>
                 <Text style={styles.exercicioNumero}>{idx + 1}</Text>
-                <Text style={styles.exercicioTexto}>{exercicio}</Text>
+                <Text style={styles.exercicioTexto}>{formatarExercicioTexto(exercicio)}</Text>
               </View>
             ))}
           </View>

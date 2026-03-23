@@ -37,13 +37,28 @@ const PONTOS_CLASSIFICACAO: Record<Classificacao, number> = {
 };
 
 // Facetas prioritárias (foco em segurança emocional)
-const FACETAS_PRIORITARIAS = ['N1', 'N6', 'N2'];
+const FACETAS_PRIORITARIAS = ['N1', 'N5', 'N6', 'N2'];
 
 // Complemento entre polos
 const POLOS_COMPLEMENTARES: Record<string, string> = {
   'N1': 'N6',  // Ansiedade e Vulnerabilidade se influenciam
   'N2': 'N6',  // Raiva e Vulnerabilidade
+  'C5': 'N6',  // Autodisciplina e Vulnerabilidade
 };
+
+const PRIORIDADE_TEMATICA: Record<string, number> = {
+  N: 1, // Regulação/Estabilização
+  C: 2, // Execução/Consistência
+  A: 3, // Limites/Relação
+  E: 4, // Energia social
+  O: 5, // Visão/Criatividade
+};
+
+const COMBINACOES_CRITICAS = [
+  { a: 'N1', b: 'N6', bonus: 1, motivo: 'Combinação crítica de vulnerabilidade emocional' },
+  { a: 'N2', b: 'N6', bonus: 1, motivo: 'Combinação crítica de reatividade e vulnerabilidade' },
+  { a: 'N1', b: 'C5', bonus: 1.5, motivo: 'Combinação crítica de ansiedade e baixa autodisciplina' },
+];
 
 /**
  * Calcula a pontuação de um protocolo baseado nos resultados
@@ -91,10 +106,111 @@ function calcularPontuacaoProtocolo(
     }
   }
 
+  // 5. Bônus por combinações críticas entre facetas
+  for (const combinacao of COMBINACOES_CRITICAS) {
+    const resultadoA = resultados.find(r => r.faceta === combinacao.a);
+    const resultadoB = resultados.find(r => r.faceta === combinacao.b);
+    const aCritico = !!resultadoA && PONTOS_CLASSIFICACAO[resultadoA.classificacao] >= 2;
+    const bCritico = !!resultadoB && PONTOS_CLASSIFICACAO[resultadoB.classificacao] >= 2;
+
+    if (aCritico && bCritico && (protocolo.faceta === combinacao.a || protocolo.faceta === combinacao.b)) {
+      pontuacao += combinacao.bonus;
+      motivos.push(combinacao.motivo);
+    }
+  }
+
   return {
     pontuacao,
     motivo: motivos.join('; ') || 'Protocolo de manutenção',
   };
+}
+
+function compararPorPrioridadeTematica(a: Recomendacao, b: Recomendacao): number {
+  if (b.pontuacao !== a.pontuacao) {
+    return b.pontuacao - a.pontuacao;
+  }
+
+  const prioridadeA = PRIORIDADE_TEMATICA[a.protocolo.fator] ?? 99;
+  const prioridadeB = PRIORIDADE_TEMATICA[b.protocolo.fator] ?? 99;
+  if (prioridadeA !== prioridadeB) {
+    return prioridadeA - prioridadeB;
+  }
+
+  return a.protocolo.codigo.localeCompare(b.protocolo.codigo);
+}
+
+function pontuarProtocolos(resultados: ResultadoFaceta[]): Recomendacao[] {
+  return TODOS_PROTOCOLOS
+    .filter(p => resultados.some(r => r.faceta === p.faceta))
+    .map(protocolo => {
+      const { pontuacao, motivo } = calcularPontuacaoProtocolo(protocolo, resultados);
+      return {
+        protocolo,
+        pontuacao,
+        prioridade: getPrioridade(pontuacao),
+        motivo,
+      };
+    })
+    .filter(r => r.pontuacao > 0)
+    .sort(compararPorPrioridadeTematica);
+}
+
+function selecionarComRegra(
+  protocolosPontuados: Recomendacao[],
+  topCount: number,
+  complementaresCount: number,
+  ajusteCount: number
+): Recomendacao[] {
+  const selecionados: Recomendacao[] = [];
+  const usados = new Set<string>();
+
+  // Top principais por pontuação e prioridade temática
+  for (const rec of protocolosPontuados) {
+    if (selecionados.length >= topCount) break;
+    if (usados.has(rec.protocolo.codigo)) continue;
+    selecionados.push(rec);
+    usados.add(rec.protocolo.codigo);
+  }
+
+  // Complementares: preferir facetas não contempladas ainda
+  const facetasUsadas = new Set(selecionados.map(s => s.protocolo.faceta));
+  for (const rec of protocolosPontuados) {
+    if (selecionados.length >= topCount + complementaresCount) break;
+    if (usados.has(rec.protocolo.codigo)) continue;
+    if (!facetasUsadas.has(rec.protocolo.faceta)) {
+      selecionados.push(rec);
+      usados.add(rec.protocolo.codigo);
+      facetasUsadas.add(rec.protocolo.faceta);
+    }
+  }
+
+  // Completa complementares caso não haja variedade suficiente
+  for (const rec of protocolosPontuados) {
+    if (selecionados.length >= topCount + complementaresCount) break;
+    if (usados.has(rec.protocolo.codigo)) continue;
+    selecionados.push(rec);
+    usados.add(rec.protocolo.codigo);
+  }
+
+  // Ajuste fino: prioriza tipo medio
+  const ajusteFino = protocolosPontuados.find(
+    rec => rec.protocolo.tipo === 'medio' && !usados.has(rec.protocolo.codigo)
+  );
+
+  if (ajusteFino && ajusteCount > 0) {
+    selecionados.push(ajusteFino);
+    usados.add(ajusteFino.protocolo.codigo);
+  }
+
+  // Fallback: se não achou ajuste tipo medio, completa com próximos
+  for (const rec of protocolosPontuados) {
+    if (selecionados.length >= topCount + complementaresCount + ajusteCount) break;
+    if (usados.has(rec.protocolo.codigo)) continue;
+    selecionados.push(rec);
+    usados.add(rec.protocolo.codigo);
+  }
+
+  return selecionados;
 }
 
 /**
@@ -130,39 +246,18 @@ function getPrioridade(pontuacao: number): 'alta' | 'media' | 'baixa' {
  */
 export function recomendarProtocolos(
   resultados: ResultadoFaceta[],
-  limite: number = 3
+  limite: number = 4
 ): Recomendacao[] {
-  // Calcular pontuação para todos os protocolos disponíveis
-  const protocolosPontuados = TODOS_PROTOCOLOS
-    .filter(p => resultados.some(r => r.faceta === p.faceta)) // Apenas protocolos para facetas testadas
-    .map(protocolo => {
-      const { pontuacao, motivo } = calcularPontuacaoProtocolo(protocolo, resultados);
-      return {
-        protocolo,
-        pontuacao,
-        prioridade: getPrioridade(pontuacao),
-        motivo,
-      };
-    })
-    .filter(r => r.pontuacao > 0) // Remove protocolos sem pontuação
-    .sort((a, b) => b.pontuacao - a.pontuacao); // Ordena por pontuação
+  const base = recomendarProtocolosCliente(resultados);
+  return base.slice(0, limite);
+}
 
-  // Retorna os N melhores, garantindo variedade de facetas se possível
-  const selecionados: Recomendacao[] = [];
-  const facetasUsadas = new Set<string>();
-
-  // Primeiro, adiciona os de maior pontuação
-  for (const recomendacao of protocolosPontuados) {
-    if (selecionados.length >= limite) break;
-    
-    // Evita duplicar facetas se houver opções suficientes
-    if (!facetasUsadas.has(recomendacao.protocolo.faceta) || selecionados.length < limite - 1) {
-      selecionados.push(recomendacao);
-      facetasUsadas.add(recomendacao.protocolo.faceta);
-    }
-  }
-
-  return selecionados;
+export function recomendarProtocolosCliente(
+  resultados: ResultadoFaceta[]
+): Recomendacao[] {
+  const protocolosPontuados = pontuarProtocolos(resultados);
+  // Regra do documento: top 3 + 1 ajuste fino = 4
+  return selecionarComRegra(protocolosPontuados, 3, 0, 1).slice(0, 4);
 }
 
 /**
@@ -174,7 +269,9 @@ export function recomendarProtocolosTreinadora(
   resultados: ResultadoFaceta[],
   limite: number = 6
 ): Recomendacao[] {
-  return recomendarProtocolos(resultados, limite);
+  const protocolosPontuados = pontuarProtocolos(resultados);
+  // Regra do documento: top 3 + 2 complementares + 1 ajuste = 6
+  return selecionarComRegra(protocolosPontuados, 3, 2, 1).slice(0, limite);
 }
 
 /**

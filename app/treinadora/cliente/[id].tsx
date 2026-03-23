@@ -15,8 +15,12 @@ import { supabase } from '@/lib/supabase/client';
 import { Mandala } from '@/components/ui/Mandala';
 import { FATORES } from '@/constants/ipip';
 import type { FatorKey } from '@/constants/ipip';
+  import { PROTOCOLOS } from '@/constants/protocolos';
+  import { getInterpretacao, type Faixa } from '@/constants/interpretacoes';
+  import { recomendarProtocolosTreinadora } from '@/utils/recomendacao';
   import { COLORS } from '@/constants/colors';
   import { gerarPDF } from '@/utils/pdfGenerator';
+  import { ProtocoloCard } from '@/components/ProtocoloCard';
 
 interface Resultado {
   id: string;
@@ -103,28 +107,43 @@ export default function TreinadoraClienteResultadoScreen() {
       // Buscar protocolos recomendados
       const { data: protocolosData, error: protocolosError } = await supabase
         .from('protocolos_recomendados')
-        .select(`
-          prioridade,
-          protocolos (
-            id,
-            titulo,
-            descricao
-          )
-        `)
+        .select('protocolo_id, prioridade')
         .eq('resultado_id', resultadoData.id)
         .order('prioridade', { ascending: true })
         .limit(6);
 
       if (protocolosError) {
         console.error('Erro ao buscar protocolos:', protocolosError);
-      } else if (protocolosData) {
-        const protocolosFormatados = protocolosData.map((p: any) => ({
-          id: p.protocolos.id,
-          titulo: p.protocolos.titulo,
-          descricao: p.protocolos.descricao,
-          prioridade: p.prioridade,
-        }));
+      }
+
+      if (protocolosData && protocolosData.length > 0) {
+        const protocolosFormatados = protocolosData
+          .map((p: any) => {
+            const protocolo = PROTOCOLOS[p.protocolo_id as string];
+            if (!protocolo) return null;
+            return {
+              id: protocolo.codigo,
+              titulo: protocolo.titulo,
+              descricao: protocolo.descricao,
+              prioridade: p.prioridade,
+            };
+          })
+          .filter((p): p is Protocolo => p !== null)
+          .sort((a, b) => a.prioridade - b.prioridade)
+          .slice(0, 6);
+
         setProtocolos(protocolosFormatados);
+      } else if (resultadoData.scores_facetas && resultadoData.scores_facetas.length > 0) {
+        const protocolosFallback = recomendarProtocolosTreinadora(resultadoData.scores_facetas)
+          .slice(0, 6)
+          .map((rec, index) => ({
+            id: rec.protocolo.codigo,
+            titulo: rec.protocolo.titulo,
+            descricao: rec.protocolo.descricao,
+            prioridade: index + 1,
+          }));
+
+        setProtocolos(protocolosFallback);
       }
     } catch (error: any) {
       console.error('Erro ao carregar dados:', error);
@@ -214,6 +233,22 @@ export default function TreinadoraClienteResultadoScreen() {
 
   const scoresFatores = resultado.scores_fatores;
 
+  const classificarParaFaixa = (classificacao: string): Faixa => {
+    const normalized = classificacao.toLowerCase().trim();
+    if (normalized.includes('muito') && normalized.includes('baixo')) return 'Muito Baixo';
+    if (normalized.includes('baixo')) return 'Baixo';
+    if (normalized.includes('muito') && normalized.includes('alto')) return 'Muito Alto';
+    if (normalized.includes('alto')) return 'Alto';
+    return 'Médio';
+  };
+
+  const fatorDestaque = [...scoresFatores]
+    .sort((a, b) => Math.abs(b.percentil - 50) - Math.abs(a.percentil - 50))[0];
+
+  const interpretacaoDestaque = fatorDestaque
+    ? getInterpretacao(fatorDestaque.fator, classificarParaFaixa(fatorDestaque.classificacao))
+    : null;
+
   return (
     <LinearGradient colors={[...COLORS.gradient]} style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -283,6 +318,21 @@ export default function TreinadoraClienteResultadoScreen() {
             })}
           </View>
 
+          {interpretacaoDestaque && fatorDestaque && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Interpretação Principal</Text>
+              <Text style={styles.sectionSubtitle}>
+                Destaque em {FATORES[fatorDestaque.fator]}
+              </Text>
+
+              <View style={styles.interpretacaoCard}>
+                <Text style={styles.interpretacaoTitulo}>{interpretacaoDestaque.titulo}</Text>
+                <Text style={styles.interpretacaoSubtitulo}>{interpretacaoDestaque.subtitulo}</Text>
+                <Text style={styles.interpretacaoDescricao}>{interpretacaoDestaque.descricao}</Text>
+              </View>
+            </View>
+          )}
+
           {/* Facetas (se disponíveis) */}
           {resultado.scores_facetas && resultado.scores_facetas.length > 0 && (
             <View style={styles.section}>
@@ -318,28 +368,24 @@ export default function TreinadoraClienteResultadoScreen() {
             <Text style={styles.sectionSubtitle}>
               Prioridade para desenvolvimento:
             </Text>
+            <Text style={styles.protocoloHint}>Toque no protocolo para ler completo</Text>
             
             {protocolos.length > 0 ? (
-              protocolos.map((protocolo, index) => (
-                <View key={protocolo.id} style={styles.protocoloCard}>
-                  <View style={styles.protocoloHeader}>
-                    <View style={[
-                      styles.protocoloNumeroContainer,
-                      index < 3 && styles.protocoloNumeroContainerHighPriority
-                    ]}>
-                      <Text style={styles.protocoloNumero}>{index + 1}</Text>
-                    </View>
-                    <View style={styles.protocoloInfo}>
-                      <Text style={styles.protocoloTitulo}>
-                        {protocolo.titulo}
-                      </Text>
-                      <Text style={styles.protocoloDescricao}>
-                        {protocolo.descricao}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              ))
+              protocolos.map((protocolo, index) => {
+                const protocoloCompleto = PROTOCOLOS[protocolo.id as keyof typeof PROTOCOLOS];
+                if (!protocoloCompleto) return null;
+
+                const prioridade = index < 3 ? 'alta' : 'media';
+
+                return (
+                  <ProtocoloCard
+                    key={protocolo.id}
+                    protocolo={protocoloCompleto}
+                    index={index}
+                    prioridade={prioridade}
+                  />
+                );
+              })
             ) : (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyStateText}>
@@ -491,6 +537,13 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     marginBottom: 16,
   },
+  protocoloHint: {
+    fontSize: 13,
+    color: COLORS.accent,
+    fontWeight: '600',
+    marginTop: -6,
+    marginBottom: 12,
+  },
   fatorCard: {
     backgroundColor: COLORS.cardBg,
     borderRadius: 12,
@@ -621,6 +674,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textSecondary,
     lineHeight: 20,
+  },
+  interpretacaoCard: {
+    backgroundColor: COLORS.cardBg,
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
+  },
+  interpretacaoTitulo: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.creamLight,
+    marginBottom: 4,
+  },
+  interpretacaoSubtitulo: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.accent,
+    marginBottom: 10,
+  },
+  interpretacaoDescricao: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
   },
   emptyState: {
     padding: 24,

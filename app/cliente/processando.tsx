@@ -12,7 +12,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '@/lib/supabase/client';
 import { calcularResultado } from '@/utils/calculadora';
-import { recomendarProtocolos } from '@/utils/recomendacao';
+import {
+  recomendarProtocolosCliente,
+  recomendarProtocolosTreinadora,
+} from '@/utils/recomendacao';
 import { MandalaAnimada } from '@/components/MandalaAnimada';
 import { COLORS } from '@/constants/colors';
 import { GRADIENTS } from '@/constants/colors-artio';
@@ -99,8 +102,9 @@ export default function ClienteProcessandoScreen() {
       // Mostrar mandala
       setShowMandala(true);
       
-      // Gerar recomendações
-      const recomendacoes = recomendarProtocolos(scoresFacetas, 3);
+      // Gerar recomendações por perfil de visualização
+      const recomendacoesCliente = recomendarProtocolosCliente(scoresFacetas);
+      const recomendacoesTreinadora = recomendarProtocolosTreinadora(scoresFacetas);
 
       // Salvar resultados
       const { data: resultadoData, error: resultadoError } = await supabase
@@ -127,9 +131,9 @@ export default function ClienteProcessandoScreen() {
         return;
       }
 
-      // Salvar protocolos recomendados
-      if (recomendacoes.length > 0) {
-        const protocolosRecomendados = recomendacoes.map((rec) => ({
+      // Salvar protocolos recomendados (base da treinadora: 6 protocolos)
+      if (recomendacoesTreinadora.length > 0) {
+        const protocolosRecomendados = recomendacoesTreinadora.map((rec) => ({
           resultado_id: resultadoData.id,
           protocolo_id: rec.protocolo.codigo,
           prioridade: rec.prioridade === 'alta' ? 1 : rec.prioridade === 'media' ? 2 : 3,
@@ -138,6 +142,11 @@ export default function ClienteProcessandoScreen() {
         await supabase
           .from('protocolos_recomendados')
           .upsert(protocolosRecomendados, { onConflict: 'resultado_id,protocolo_id' });
+      }
+
+      // Garante que a cliente sempre tenha 4 recomendações calculadas no fluxo
+      if (recomendacoesCliente.length === 0) {
+        console.warn('Nenhuma recomendação de cliente foi gerada para o resultado atual.');
       }
 
       // Finalizar

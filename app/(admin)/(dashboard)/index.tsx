@@ -255,11 +255,11 @@ export default function DashboardOverviewScreen() {
                   <Text style={styles.barValue}>{stats?.totalCodigosUsados || 0}</Text>
                 </View>
 
-                {/* Barra: Disponíveis */}
+                {/* Barra: Ativos */}
                 <View style={styles.barRow}>
                   <View style={styles.barLabelContainer}>
                     <View style={[styles.barLegendDot, { backgroundColor: ADMIN_COLORS.info }]} />
-                    <Text style={styles.barLabel}>Disponíveis</Text>
+                    <Text style={styles.barLabel}>Ativos</Text>
                   </View>
                   <View style={styles.barTrack}>
                     <View 
@@ -267,12 +267,12 @@ export default function DashboardOverviewScreen() {
                         styles.barFill, 
                         { 
                           backgroundColor: ADMIN_COLORS.info,
-                          width: `${Math.min(((stats?.codigosDisponiveis || 0) / Math.max(stats?.totalCodigos || 1, 1)) * 100, 100)}%` 
+                          width: `${Math.min(((stats?.codigosAtivos || 0) / Math.max(stats?.totalCodigos || 1, 1)) * 100, 100)}%` 
                         }
                       ]} 
                     />
                   </View>
-                  <Text style={styles.barValue}>{stats?.codigosDisponiveis || 0}</Text>
+                  <Text style={styles.barValue}>{stats?.codigosAtivos || 0}</Text>
                 </View>
 
                 {/* Legenda resumida */}
