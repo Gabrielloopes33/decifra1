@@ -14,18 +14,24 @@
 
     body {
       font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #2D1518;
-      color: #F5F0E8;
-      line-height: 1.6;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.5;
       font-size: 13px;
     }
 
+    /* Configuração de página A4 */
+    @page {
+      size: A4;
+      margin: 25mm 25mm 30mm 25mm;
+    }
+
     .page {
-      width: 210mm;
-      min-height: 297mm;
-      padding: 15mm;
+      width: 100%;
+      max-width: 160mm;
       margin: 0 auto;
-      background-color: #2D1518;
+      padding: 0 15px;
+      background-color: #ffffff;
       page-break-after: always;
     }
 
@@ -33,14 +39,14 @@
       page-break-after: avoid;
     }
 
-    /* Header */
+    /* Header com mais espaçamento */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #C4785A;
+      padding: 20px 0;
       margin-bottom: 25px;
+      border-bottom: 3px solid #C4785A;
     }
 
     .header-left {
@@ -52,26 +58,27 @@
     .logo {
       width: 60px;
       height: 60px;
-      background: rgba(196, 120, 90, 0.2);
+      background: #f8f5f2;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid #C4785A;
+      border: 3px solid #C4785A;
       font-size: 28px;
       color: #C4785A;
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .header-title h1 {
-      font-size: 22px;
-      font-weight: 600;
-      color: #F5F0E8;
+      font-size: 20px;
+      font-weight: 800;
+      color: #1a1a1a;
+      letter-spacing: 1px;
     }
 
     .header-title p {
-      font-size: 13px;
-      color: #C4785A;
+      font-size: 12px;
+      color: #666666;
     }
 
     .header-right {
@@ -79,43 +86,45 @@
     }
 
     .confidencial {
-      font-size: 11px;
+      font-size: 10px;
       color: #C4785A;
       border: 1px solid #C4785A;
       padding: 4px 10px;
       border-radius: 4px;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 700;
     }
 
     /* Info Section */
     .info-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      gap: 16px;
       margin-bottom: 25px;
     }
 
     .info-box {
-      background: rgba(196, 120, 90, 0.1);
-      border-radius: 10px;
-      padding: 15px;
-      border: 1px solid rgba(196, 120, 90, 0.3);
+      background: #f8f5f2;
+      border-radius: 12px;
+      padding: 16px 20px;
+      border: 1px solid #e8e0d8;
     }
 
     .info-box h3 {
-      font-size: 12px;
+      font-size: 11px;
       color: #C4785A;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      font-weight: 700;
     }
 
     .info-row {
       display: flex;
       justify-content: space-between;
-      padding: 5px 0;
-      border-bottom: 1px solid rgba(245, 240, 232, 0.1);
+      padding: 6px 0;
+      border-bottom: 1px solid #e8e0d8;
     }
 
     .info-row:last-child {
@@ -123,81 +132,85 @@
     }
 
     .info-label {
-      font-size: 12px;
-      color: #888;
+      font-size: 11px;
+      color: #666666;
     }
 
     .info-value {
-      font-size: 13px;
-      font-weight: 500;
-      color: #F5F0E8;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a1a1a;
     }
 
     /* Section Title */
     .section-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #C4785A;
+      font-size: 16px;
+      font-weight: 800;
+      color: #1a1a1a;
       margin: 25px 0 15px 0;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(196, 120, 90, 0.3);
+      border-bottom: 2px solid #C4785A;
     }
 
     /* Fatores Grid - Compacto */
     .fatores-compact {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 25px;
     }
 
     .fator-compact {
-      background: rgba(245, 240, 232, 0.05);
+      background: #fafafa;
       border-radius: 10px;
-      padding: 15px 10px;
+      padding: 14px 10px;
       text-align: center;
+      border: 1px solid #e8e0d8;
       border-top: 3px solid;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .fator-sigla {
-      width: 40px;
-      height: 40px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
-      color: #2D1518;
-      margin: 0 auto 10px;
+      color: #ffffff;
+      margin: 0 auto 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .fator-nome {
-      font-size: 12px;
-      font-weight: 600;
-      color: #F5F0E8;
-      margin-bottom: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
     }
 
     .fator-score {
-      font-size: 24px;
-      font-weight: 700;
-      color: #F5F0E8;
+      font-size: 20px;
+      font-weight: 800;
+      color: #1a1a1a;
     }
 
     .fator-classificacao {
-      font-size: 11px;
-      color: #888;
-      margin-top: 5px;
+      font-size: 10px;
+      color: #666666;
+      margin-top: 4px;
     }
 
     .progress-container {
       width: 100%;
       height: 6px;
-      background: rgba(245, 240, 232, 0.1);
+      background: #e8e0d8;
       border-radius: 3px;
       overflow: hidden;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .progress-fill {
@@ -205,23 +218,28 @@
       border-radius: 3px;
     }
 
-    /* Facetas Table */
+    /* Facetas Section - Nova Página */
     .facetas-section {
-      margin-bottom: 25px;
+      page-break-before: always;
+      break-before: page;
+      margin-top: 40px;
     }
 
     .fator-grupo {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .fator-grupo-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 15px;
-      background: rgba(196, 120, 90, 0.15);
+      padding: 10px 14px;
+      background: #f8f5f2;
       border-radius: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      border: 1px solid #e8e0d8;
     }
 
     .fator-grupo-sigla {
@@ -233,13 +251,14 @@
       justify-content: center;
       font-size: 14px;
       font-weight: 700;
-      color: #2D1518;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .fator-grupo-nome {
       font-size: 14px;
-      font-weight: 600;
-      color: #F5F0E8;
+      font-weight: 700;
+      color: #1a1a1a;
     }
 
     .facetas-table {
@@ -250,127 +269,138 @@
     .facetas-table th {
       text-align: left;
       padding: 8px 10px;
-      font-size: 11px;
-      color: #888;
+      font-size: 10px;
+      color: #666666;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      border-bottom: 1px solid rgba(196, 120, 90, 0.3);
+      border-bottom: 1px solid #e8e0d8;
+      background: #fafafa;
+      font-weight: 700;
     }
 
     .facetas-table td {
-      padding: 10px;
-      border-bottom: 1px solid rgba(245, 240, 232, 0.05);
+      padding: 8px 10px;
+      border-bottom: 1px solid #f0f0f0;
     }
 
-    .facetas-table tr:hover {
-      background: rgba(245, 240, 232, 0.02);
+    .facetas-table tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .faceta-codigo {
       font-family: monospace;
       font-size: 12px;
       color: #C4785A;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .faceta-nome {
-      font-size: 13px;
-      color: #F5F0E8;
+      font-size: 12px;
+      color: #1a1a1a;
     }
 
     .faceta-score {
-      font-size: 14px;
-      font-weight: 600;
-      color: #F5F0E8;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
     }
 
     .faceta-percentil {
-      width: 100px;
+      width: 80px;
     }
 
     .faceta-classificacao {
       display: inline-block;
       padding: 3px 8px;
       border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
+      font-size: 10px;
+      font-weight: 600;
     }
 
     .class-baixo {
       background: rgba(123, 158, 135, 0.2);
-      color: #7B9E87;
+      color: #2d5a3d;
     }
 
     .class-medio {
       background: rgba(212, 165, 116, 0.2);
-      color: #D4A574;
+      color: #8b6914;
     }
 
     .class-alto {
       background: rgba(196, 120, 90, 0.2);
-      color: #C4785A;
+      color: #8b4513;
     }
 
-    /* Protocolos Section */
+    /* Protocolos Section - Nova Página */
+    .protocolos-section {
+      page-break-before: always;
+      break-before: page;
+      margin-top: 40px;
+    }
+
     .protocolos-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      grid-template-columns: 1fr;
+      gap: 12px;
     }
 
     .protocolo-card {
-      background: rgba(245, 240, 232, 0.03);
+      background: #fafafa;
       border-radius: 10px;
-      padding: 15px;
-      border: 1px solid rgba(196, 120, 90, 0.2);
+      padding: 16px 20px;
+      border: 1px solid #e8e0d8;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .protocolo-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
 
     .prioridade-badge {
       padding: 3px 8px;
-      border-radius: 15px;
-      font-size: 10px;
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 9px;
+      font-weight: 700;
       text-transform: uppercase;
     }
 
     .prioridade-1 {
       background: #C4785A;
-      color: #2D1518;
+      color: #ffffff;
     }
 
     .prioridade-2 {
       background: #D4A574;
-      color: #2D1518;
+      color: #1a1a1a;
     }
 
     .prioridade-3 {
       background: #7B9E87;
-      color: #2D1518;
+      color: #ffffff;
     }
 
     .faceta-tag {
-      font-size: 11px;
-      color: #888;
+      font-size: 10px;
+      color: #666666;
     }
 
     .protocolo-titulo {
       font-size: 14px;
-      font-weight: 600;
-      color: #F5F0E8;
-      margin-bottom: 8px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
     }
 
     .protocolo-descricao {
       font-size: 12px;
-      color: #aaa;
-      margin-bottom: 10px;
+      color: #555555;
+      margin-bottom: 8px;
       line-height: 1.5;
     }
 
@@ -380,10 +410,11 @@
     }
 
     .exercicios-list li {
-      padding: 4px 0 4px 18px;
+      padding: 3px 0 3px 16px;
       position: relative;
       font-size: 11px;
-      color: #bbb;
+      color: #444444;
+      line-height: 1.4;
     }
 
     .exercicios-list li::before {
@@ -394,33 +425,59 @@
       font-size: 10px;
     }
 
-    /* Footer */
+    /* Footer com mais espaçamento */
     .footer {
-      margin-top: 30px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(196, 120, 90, 0.2);
+      margin-top: 40px;
+      padding: 20px 0;
+      border-top: 2px solid rgba(196, 120, 90, 0.3);
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
-      color: #666;
+      font-size: 10px;
+      color: #888888;
     }
 
     .footer-brand {
-      font-weight: 600;
+      font-weight: 700;
       color: #C4785A;
     }
 
     /* Print styles */
     @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
       body {
-        background: #2D1518;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        background: #ffffff !important;
       }
       
       .page {
-        width: 100%;
-        padding: 10mm;
+        padding: 0;
+        margin: 0;
+        page-break-after: always;
+      }
+
+      .page:last-child {
+        page-break-after: avoid;
+      }
+
+      .fator-compact, .fator-grupo, .protocolo-card, .facetas-table tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .facetas-section, .protocolos-section {
+        page-break-before: always;
+        break-before: page;
+      }
+
+      .facetas-table {
+        page-break-inside: auto;
+      }
+
+      .facetas-table thead {
+        display: table-header-group;
       }
     }
   </style>
@@ -432,7 +489,7 @@
       <div class="header-left">
         <div class="logo">Á</div>
         <div class="header-title">
-          <h1>Relatório de Personalidade</h1>
+          <h1>DECIFRA</h1>
           <p>Versão Profissional - Uso Exclusivo da Treinadora</p>
         </div>
       </div>
@@ -523,8 +580,8 @@
     </div>
   </div>
 
-  <!-- Página 2-3: Detalhamento das 30 Facetas -->
-  <div class="page">
+  <!-- Página 2: Detalhamento das 30 Facetas -->
+  <div class="facetas-section">
     <h2 class="section-title">Análise Detalhada - 30 Facetas</h2>
 
     {{!-- Agrupar facetas por fator --}}
@@ -544,8 +601,8 @@
               <th>Código</th>
               <th>Faceta</th>
               <th>Score</th>
-              <th>Percentil</th>
-              <th>Classificação</th>
+              <th>%</th>
+              <th>Class.</th>
             </tr>
           </thead>
           <tbody>

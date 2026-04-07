@@ -1,6 +1,7 @@
 /**
  * Gerador de PDF para Resultados DECIFRA
- * Identidade Visual Ártio completa
+ * Identidade Visual Ártio - Tema Claro para Impressão
+ * Otimizado para A4 com controle de quebras de página
  */
 
 import * as Print from 'expo-print';
@@ -49,17 +50,46 @@ interface PDFData {
   tipo: 'cliente' | 'treinadora';
 }
 
-// Cores Ártio
+// Cores Ártio - Tema Claro para PDF/Impressão
 const COLORS = {
-  vinhoDeep: '#2D1518',
-  vinhoDark: '#3D1A1E',
-  vinho: '#6B2D3A',
-  terracota: '#C4785A',
-  terracotaLight: '#D4896A',
-  cream: '#F5F0E8',
-  creamLight: '#FAF8F5',
-  creamDark: '#E8E0D1',
+  // Fundos
+  background: '#FFFFFF',
+  cardBackground: '#FAFAFA',
+  sectionBackground: '#F8F5F2',
+  
+  // Textos
+  textPrimary: '#1A1A1A',
+  textSecondary: '#555555',
+  textMuted: '#888888',
+  
+  // Cores de destaque
+  primary: '#C4785A',
+  primaryDark: '#A85D40',
+  primaryLight: '#D4896A',
+  
+  // Cores dos fatores
+  fatorN: '#7B9E87', // Neuroticismo - verde
+  fatorE: '#D4A574', // Extroversão - dourado
+  fatorO: '#C4785A', // Abertura - terracota
+  fatorA: '#7B8B9E', // Amabilidade - azul acinzentado
+  fatorC: '#9E7B8B', // Conscienciosidade - roxo acinzentado
+  
+  // Bordas
+  border: '#E8E0D8',
+  borderLight: '#F0EBE5',
 };
+
+// Mapear fator para cor
+function getFatorCor(fator: FatorKey): string {
+  const cores: Record<FatorKey, string> = {
+    'N': COLORS.fatorN,
+    'E': COLORS.fatorE,
+    'O': COLORS.fatorO,
+    'A': COLORS.fatorA,
+    'C': COLORS.fatorC,
+  };
+  return cores[fator] || COLORS.primary;
+}
 
 function sanitizarNomeArquivo(nome: string): string {
   return nome
@@ -188,11 +218,7 @@ function gerarTemplateHTML(dados: PDFData): string {
     ? getInterpretacao(fatorDestaque.fator, classificarParaFaixa(fatorDestaque.classificacao))
     : null;
 
-  // Wrapper com fundo escuro garantido
-  const pageBackground = COLORS.vinhoDeep;
-  const cardBackground = COLORS.vinhoDark;
-
-  // Facetas
+  // Facetas - organizadas em uma tabela compacta
   let facetasHTML = '';
   if (isTreinadora && resultado.scores_facetas && resultado.scores_facetas.length > 0) {
     const facetasPorColuna = Math.ceil(resultado.scores_facetas.length / 2);
@@ -200,20 +226,20 @@ function gerarTemplateHTML(dados: PDFData): string {
     const coluna2 = resultado.scores_facetas.slice(facetasPorColuna);
     
     facetasHTML = `
-      <div style="margin-top: 32px;">
-        <div style="font-size: 20px; font-weight: 700; color: ${COLORS.cream}; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid ${COLORS.terracota}; font-family: 'Urbanist', sans-serif;">
+      <div class="page-break-before section-container">
+        <div style="font-size: 20px; font-weight: 700; color: ${COLORS.primary}; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid ${COLORS.border}; font-family: 'Urbanist', sans-serif;">
           30 Facetas Detalhadas
         </div>
-        <table style="width: 100%; border-collapse: collapse;">
+        <table class="facetas-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
           <tr>
             <td style="width: 50%; vertical-align: top; padding-right: 8px;">
               ${coluna1.map(f => `
-                <div style="background: ${cardBackground}; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid ${COLORS.terracota}60;">
+                <div class="faceta-item" style="background: ${COLORS.cardBackground}; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid ${COLORS.border};">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; color: ${COLORS.cream}; font-size: 13px; font-family: 'Urbanist', sans-serif;">${f.faceta}</span>
+                    <span style="font-weight: 600; color: ${COLORS.textPrimary}; font-size: 12px; font-family: 'Urbanist', sans-serif;">${f.faceta}</span>
                     <span style="text-align: right;">
-                      <span style="font-weight: 700; color: ${COLORS.terracota}; font-size: 14px; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
-                      <span style="font-size: 11px; color: ${COLORS.creamDark}; display: block; margin-top: 2px; font-family: 'Urbanist', sans-serif;">${f.classificacao}</span>
+                      <span style="font-weight: 700; color: ${COLORS.primary}; font-size: 13px; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
+                      <span style="font-size: 10px; color: ${COLORS.textMuted}; display: block; margin-top: 1px; font-family: 'Urbanist', sans-serif;">${f.classificacao}</span>
                     </span>
                   </div>
                 </div>
@@ -221,12 +247,12 @@ function gerarTemplateHTML(dados: PDFData): string {
             </td>
             <td style="width: 50%; vertical-align: top; padding-left: 8px;">
               ${coluna2.map(f => `
-                <div style="background: ${cardBackground}; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid ${COLORS.terracota}60;">
+                <div class="faceta-item" style="background: ${COLORS.cardBackground}; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; border: 1px solid ${COLORS.border};">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; color: ${COLORS.cream}; font-size: 13px; font-family: 'Urbanist', sans-serif;">${f.faceta}</span>
+                    <span style="font-weight: 600; color: ${COLORS.textPrimary}; font-size: 12px; font-family: 'Urbanist', sans-serif;">${f.faceta}</span>
                     <span style="text-align: right;">
-                      <span style="font-weight: 700; color: ${COLORS.terracota}; font-size: 14px; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
-                      <span style="font-size: 11px; color: ${COLORS.creamDark}; display: block; margin-top: 2px; font-family: 'Urbanist', sans-serif;">${f.classificacao}</span>
+                      <span style="font-weight: 700; color: ${COLORS.primary}; font-size: 13px; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
+                      <span style="font-size: 10px; color: ${COLORS.textMuted}; display: block; margin-top: 1px; font-family: 'Urbanist', sans-serif;">${f.classificacao}</span>
                     </span>
                   </div>
                 </div>
@@ -238,7 +264,7 @@ function gerarTemplateHTML(dados: PDFData): string {
     `;
   }
 
-  // Protocolos
+  // Protocolos - mais compactos
   const protocolosHTML = protocolos.length > 0 
     ? protocolos.map((p, i) => {
       const protocoloCompleto = PROTOCOLOS[p.id as keyof typeof PROTOCOLOS];
@@ -253,26 +279,26 @@ function gerarTemplateHTML(dados: PDFData): string {
         const duracao = escapeHtml(exercicio.duracao || 'Não informado');
 
         return `
-          <div style="margin-bottom: 10px; padding: 10px 12px; border-radius: 8px; background: ${COLORS.vinhoDeep}; border: 1px solid ${COLORS.terracota}40;">
-            <div style="font-size: 13px; font-weight: 700; color: ${COLORS.cream}; margin-bottom: 4px; font-family: 'Urbanist', sans-serif;">${idx + 1}. ${tituloExercicio}</div>
-            <div style="font-size: 12px; color: ${COLORS.creamDark}; line-height: 1.6; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">${descricaoExercicio}</div>
-            <div style="font-size: 11px; color: ${COLORS.terracotaLight}; font-family: 'Urbanist', sans-serif;">Frequência: ${frequencia} | Duração: ${duracao}</div>
+          <div class="exercicio-item" style="margin-bottom: 8px; padding: 8px 10px; border-radius: 6px; background: ${COLORS.sectionBackground}; border: 1px solid ${COLORS.border};">
+            <div style="font-size: 12px; font-weight: 700; color: ${COLORS.textPrimary}; margin-bottom: 2px; font-family: 'Urbanist', sans-serif;">${idx + 1}. ${tituloExercicio}</div>
+            <div style="font-size: 11px; color: ${COLORS.textSecondary}; line-height: 1.5; margin-bottom: 3px; font-family: 'Urbanist', sans-serif;">${descricaoExercicio}</div>
+            <div style="font-size: 10px; color: ${COLORS.primary}; font-family: 'Urbanist', sans-serif;">Freq: ${frequencia} | Duração: ${duracao}</div>
           </div>
         `;
       }).join('');
 
       return `
-        <div style="background: ${cardBackground}; border-radius: 14px; padding: 20px; margin-bottom: 14px; border: 1px solid ${COLORS.terracota}60;">
-          <div style="display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; background: ${i < 3 ? COLORS.terracota : COLORS.vinho}; color: ${COLORS.cream}; border-radius: 50%; font-weight: 700; font-size: 15px; flex-shrink: 0; border: 2px solid ${COLORS.cream}40; font-family: 'Urbanist', sans-serif;">${i + 1}</div>
+        <div class="protocolo-card" style="background: ${COLORS.cardBackground}; border-radius: 12px; padding: 18px 22px; margin-bottom: 12px; border: 1px solid ${COLORS.border};">
+          <div style="display: flex; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: ${i < 3 ? COLORS.primary : COLORS.sectionBackground}; color: ${i < 3 ? '#FFFFFF' : COLORS.textPrimary}; border-radius: 50%; font-weight: 700; font-size: 13px; flex-shrink: 0; border: 2px solid ${COLORS.border}; font-family: 'Urbanist', sans-serif;">${i + 1}</div>
             <div style="flex: 1;">
-              <div style="font-weight: 700; color: ${COLORS.cream}; font-size: 16px; margin-bottom: 8px; font-family: 'Urbanist', sans-serif;">${titulo}</div>
-              <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 6px; font-weight: 700; font-family: 'Urbanist', sans-serif;">Objetivo</div>
-              <div style="font-size: 13px; color: ${COLORS.creamDark}; line-height: 1.6; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">${objetivo}</div>
-              <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 6px; font-weight: 700; font-family: 'Urbanist', sans-serif;">Descrição</div>
-              <div style="font-size: 13px; color: ${COLORS.creamDark}; line-height: 1.6; margin-bottom: 12px; font-family: 'Urbanist', sans-serif;">${descricao}</div>
+              <div style="font-weight: 700; color: ${COLORS.textPrimary}; font-size: 15px; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">${titulo}</div>
+              <div style="font-size: 12px; color: ${COLORS.primary}; margin-bottom: 4px; font-weight: 600; font-family: 'Urbanist', sans-serif;">Objetivo</div>
+              <div style="font-size: 12px; color: ${COLORS.textSecondary}; line-height: 1.5; margin-bottom: 8px; font-family: 'Urbanist', sans-serif;">${objetivo}</div>
+              <div style="font-size: 12px; color: ${COLORS.primary}; margin-bottom: 4px; font-weight: 600; font-family: 'Urbanist', sans-serif;">Descrição</div>
+              <div style="font-size: 12px; color: ${COLORS.textSecondary}; line-height: 1.5; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">${descricao}</div>
               ${exercicios ? `
-                <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 8px; font-weight: 700; font-family: 'Urbanist', sans-serif;">Exercícios</div>
+                <div style="font-size: 12px; color: ${COLORS.primary}; margin-bottom: 6px; font-weight: 600; font-family: 'Urbanist', sans-serif;">Exercícios</div>
                 ${exercicios}
               ` : ''}
             </div>
@@ -281,47 +307,49 @@ function gerarTemplateHTML(dados: PDFData): string {
       `;
     }).join('')
     : `
-      <div style="background: ${cardBackground}; border-radius: 14px; padding: 24px; border: 1px solid ${COLORS.terracota}60; text-align: center;">
-        <div style="color: ${COLORS.creamDark}; font-size: 14px; font-style: italic; font-family: 'Urbanist', sans-serif;">Nenhum protocolo recomendado para este perfil.</div>
+      <div style="background: ${COLORS.cardBackground}; border-radius: 12px; padding: 20px; border: 1px solid ${COLORS.border}; text-align: center;">
+        <div style="color: ${COLORS.textSecondary}; font-size: 14px; font-style: italic; font-family: 'Urbanist', sans-serif;">Nenhum protocolo recomendado para este perfil.</div>
       </div>
     `;
 
-  // Fatores
-  const fatoresHTML = scoresOrdenados.map(f => `
-    <div style="background: ${cardBackground}; border-radius: 16px; padding: 22px; margin-bottom: 16px; border: 2px solid ${COLORS.terracota}80;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-        <span style="font-weight: 700; font-size: 18px; color: ${COLORS.cream}; font-family: 'Urbanist', sans-serif;">${FATORES[f.fator]}</span>
-        <span style="background: ${COLORS.terracota}; color: ${COLORS.vinhoDeep}; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Urbanist', sans-serif;">${f.classificacao}</span>
+  // Fatores com cores individuais - mais compactos
+  const fatoresHTML = scoresOrdenados.map(f => {
+    const fatorCor = getFatorCor(f.fator);
+    return `
+    <div class="fator-card" style="background: ${COLORS.cardBackground}; border-radius: 12px; padding: 18px 22px; margin-bottom: 12px; border: 2px solid ${fatorCor}40;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span style="font-weight: 700; font-size: 16px; color: ${COLORS.textPrimary}; font-family: 'Urbanist', sans-serif;">${FATORES[f.fator]}</span>
+        <span style="background: ${fatorCor}; color: #FFFFFF; padding: 6px 12px; border-radius: 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Urbanist', sans-serif;">${f.classificacao}</span>
       </div>
       <div>
-        <div style="height: 14px; background: ${COLORS.vinhoDeep}; border-radius: 7px; overflow: hidden; border: 1px solid ${COLORS.terracota}40;">
-          <div style="height: 100%; background: linear-gradient(90deg, ${COLORS.terracota} 0%, ${COLORS.terracotaLight} 100%); border-radius: 7px; width: ${f.percentil}%;"></div>
+        <div style="height: 10px; background: ${COLORS.borderLight}; border-radius: 5px; overflow: hidden; border: 1px solid ${COLORS.border};">
+          <div style="height: 100%; background: ${fatorCor}; border-radius: 5px; width: ${f.percentil}%;"></div>
         </div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
-          <span style="font-size: 13px; color: ${COLORS.creamDark}; font-family: 'Urbanist', sans-serif;">Percentil</span>
-          <span style="font-size: 20px; color: ${COLORS.terracota}; font-weight: 800; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <span style="font-size: 12px; color: ${COLORS.textMuted}; font-family: 'Urbanist', sans-serif;">Percentil</span>
+          <span style="font-size: 18px; color: ${fatorCor}; font-weight: 800; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
         </div>
-        ${isTreinadora ? `<div style="font-size: 12px; color: ${COLORS.creamDark}; margin-top: 6px; text-align: right; font-style: italic; font-family: 'Urbanist', sans-serif;">Score bruto: ${f.score.toFixed(2)}</div>` : ''}
+        ${isTreinadora ? `<div style="font-size: 11px; color: ${COLORS.textMuted}; margin-top: 4px; text-align: right; font-style: italic; font-family: 'Urbanist', sans-serif;">Score: ${f.score.toFixed(2)}</div>` : ''}
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
   const interpretacaoHTML = interpretacaoDestaque && fatorDestaque
     ? `
-      <div style="margin-top: 24px; background: ${cardBackground}; border-radius: 16px; padding: 20px; border: 1px solid ${COLORS.terracota}60;">
-        <div style="font-size: 20px; font-weight: 800; color: ${COLORS.cream}; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">
+      <div class="interpretacao-card" style="background: ${COLORS.cardBackground}; border-radius: 12px; padding: 16px; border: 1px solid ${COLORS.border}; margin-top: 20px;">
+        <div style="font-size: 18px; font-weight: 800; color: ${COLORS.textPrimary}; margin-bottom: 6px; font-family: 'Urbanist', sans-serif;">
           ${isTreinadora ? 'Interpretação Principal' : 'Quem Você É'}
         </div>
-        <div style="font-size: 13px; color: ${COLORS.terracotaLight}; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">
+        <div style="font-size: 12px; color: ${COLORS.primary}; margin-bottom: 8px; font-family: 'Urbanist', sans-serif;">
           Destaque em ${FATORES[fatorDestaque.fator]}
         </div>
-        <div style="font-size: 16px; font-weight: 700; color: ${COLORS.cream}; margin-bottom: 4px; font-family: 'Urbanist', sans-serif;">
+        <div style="font-size: 15px; font-weight: 700; color: ${COLORS.textPrimary}; margin-bottom: 4px; font-family: 'Urbanist', sans-serif;">
           ${interpretacaoDestaque.titulo}
         </div>
-        <div style="font-size: 14px; font-weight: 600; color: ${COLORS.terracota}; margin-bottom: 10px; font-family: 'Urbanist', sans-serif;">
+        <div style="font-size: 13px; font-weight: 600; color: ${COLORS.primary}; margin-bottom: 8px; font-family: 'Urbanist', sans-serif;">
           ${interpretacaoDestaque.subtitulo}
         </div>
-        <div style="font-size: 14px; color: ${COLORS.creamDark}; line-height: 1.7; font-family: 'Urbanist', sans-serif;">
+        <div style="font-size: 13px; color: ${COLORS.textSecondary}; line-height: 1.6; font-family: 'Urbanist', sans-serif;">
           ${interpretacaoDestaque.descricao}
         </div>
       </div>
@@ -339,112 +367,316 @@ function gerarTemplateHTML(dados: PDFData): string {
   <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     @page {
-      margin: 0;
-      padding: 0;
-      size: auto;
+      size: A4;
+      margin: 25mm 25mm 30mm 25mm;
     }
+    
     @media print {
       * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
       }
+      
       html, body {
         margin: 0 !important;
         padding: 0 !important;
-        background: ${pageBackground} !important;
+        background: ${COLORS.background} !important;
       }
+      
       .page-wrapper {
-        background: ${pageBackground} !important;
+        background: ${COLORS.background} !important;
+        padding: 0 !important;
         margin: 0 !important;
-        padding: 40px 32px !important;
-        min-height: 100vh;
+      }
+      
+      /* Evitar quebras no meio de cards */
+      .fator-card, .protocolo-card, .interpretacao-card, .faceta-item, .exercicio-item {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+      
+      /* Quebras de página estratégicas */
+      .page-break-before {
+        break-before: page !important;
+        page-break-before: always !important;
+      }
+      
+      /* Manter seções juntas quando possível */
+      .section-container {
+        break-inside: auto;
+      }
+      
+      /* Evitar quebras entre título e conteúdo */
+      .section-title {
+        break-after: avoid !important;
+        page-break-after: avoid !important;
       }
     }
+    
     * {
       box-sizing: border-box;
     }
+    
     html, body {
       margin: 0;
       padding: 0;
-      background: ${pageBackground};
-      font-family: 'Urbanist', sans-serif;
+      background: ${COLORS.background};
+      font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
     }
+    
     .page-wrapper {
-      background: ${pageBackground};
-      min-height: 100vh;
-      padding: 40px 32px;
-      margin: 0;
+      background: ${COLORS.background};
+      max-width: 160mm;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
+    
+    /* Header com mais espaçamento */
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      margin-bottom: 30px;
+      border-bottom: 3px solid ${COLORS.primary};
+    }
+    
+    .logo-container {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 20px;
+      background: ${COLORS.sectionBackground};
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid ${COLORS.primary};
+    }
+    
+    .logo-text {
+      font-size: 32px;
+      color: ${COLORS.primary};
+      font-weight: 800;
+    }
+    
+    .brand-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: ${COLORS.textPrimary};
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+    }
+    
+    .brand-subtitle {
+      font-size: 13px;
+      color: ${COLORS.textSecondary};
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+    
+    .badge {
+      display: inline-block;
+      background: ${COLORS.primary};
+      color: #FFFFFF;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* Info Section */
+    .info-section {
+      background: ${COLORS.sectionBackground};
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 30px;
+      border: 1px solid ${COLORS.border};
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid ${COLORS.border};
+    }
+    
+    .info-row:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .info-label {
+      font-weight: 700;
+      color: ${COLORS.primary};
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .info-value {
+      font-weight: 600;
+      color: ${COLORS.textPrimary};
+      font-size: 15px;
+    }
+    
+    .info-value-secondary {
+      font-weight: 500;
+      color: ${COLORS.textSecondary};
+      font-size: 13px;
+    }
+    
+    /* Section Title */
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: ${COLORS.textPrimary};
+      margin: 30px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 3px solid ${COLORS.primary};
+    }
+    
+    /* Fatores Section */
+    .fatores-section {
+      margin-bottom: 30px;
+    }
+    
+    /* Facetas Section */
+    .facetas-section {
+      margin-bottom: 30px;
+    }
+    
+    .facetas-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    /* Protocolos Section */
+    .protocolos-section {
+      margin-bottom: 30px;
+    }
+    
+    /* Footer com mais espaçamento */
+    .footer {
+      margin-top: 50px;
+      padding: 30px 0;
+      border-top: 2px solid ${COLORS.primary}40;
+      text-align: center;
+    }
+    
+    .footer-brand {
+      font-size: 15px;
+      font-weight: 800;
+      color: ${COLORS.primary};
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+    
+    .footer-date {
+      font-size: 11px;
+      color: ${COLORS.textSecondary};
+      margin-bottom: 6px;
+      font-style: italic;
+    }
+    
+    .footer-copyright {
+      font-size: 10px;
+      color: ${COLORS.textMuted};
+    }
+    
+    .footer-notice {
+      margin-top: 20px;
+      padding: 16px;
+      background: ${COLORS.sectionBackground};
+      border-radius: 10px;
+      border: 1px solid ${COLORS.border};
+    }
+    
+    .footer-notice-text {
+      font-size: 11px;
+      color: ${COLORS.textSecondary};
+      font-style: italic;
+      line-height: 1.6;
+    }
+    
+    /* Page break utilities */
+    .page-break-before {
+      break-before: page;
+      page-break-before: always;
     }
   </style>
 </head>
 <body>
   <div class="page-wrapper">
     
-    <!-- Header (espaço reservado para logo no backend) -->
-    <div style="text-align: center; padding-bottom: 28px; margin-bottom: 28px; border-bottom: 2px solid ${COLORS.terracota}60;">
-      <!-- Espaço reservado para logo -->
-      <div style="height: 20px;"></div>
-      <div style="font-size: 36px; font-weight: 800; color: ${COLORS.cream}; margin-bottom: 6px; letter-spacing: 4px; text-transform: uppercase; font-family: 'Urbanist', sans-serif;">DECIFRA</div>
-      <div style="font-size: 15px; color: ${COLORS.terracota}; font-weight: 600; letter-spacing: 2px; font-family: 'Urbanist', sans-serif;">Avaliação de Personalidade Big Five</div>
-      <div style="display: inline-block; background: ${COLORS.terracota}; color: ${COLORS.vinhoDeep}; padding: 10px 24px; border-radius: 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; font-family: 'Urbanist', sans-serif;">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-container">
+        <span class="logo-text">Á</span>
+      </div>
+      <div class="brand-name">DECIFRA</div>
+      <div class="brand-subtitle">Avaliação de Personalidade Big Five</div>
+      <div class="badge">
         ${isTreinadora ? 'Relatório Completo' : 'Relatório do Cliente'}
       </div>
     </div>
     
     <!-- Info Section -->
-    <div style="background: ${cardBackground}; border-radius: 18px; padding: 28px; margin-bottom: 32px; border: 2px solid ${COLORS.terracota}60;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid ${COLORS.terracota}40;">
-        <span style="font-weight: 800; color: ${COLORS.terracota}; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Urbanist', sans-serif;">Cliente</span>
-        <span style="font-weight: 700; color: ${COLORS.cream}; font-size: 17px; font-family: 'Urbanist', sans-serif;">${cliente.nome}</span>
+    <div class="info-section">
+      <div class="info-row">
+        <span class="info-label">Cliente</span>
+        <span class="info-value">${cliente.nome}</span>
       </div>
       ${cliente.email ? `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid ${COLORS.terracota}40;">
-        <span style="font-weight: 800; color: ${COLORS.terracota}; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Urbanist', sans-serif;">Email</span>
-        <span style="font-weight: 500; color: ${COLORS.creamDark}; font-size: 15px; font-family: 'Urbanist', sans-serif;">${cliente.email}</span>
+      <div class="info-row">
+        <span class="info-label">Email</span>
+        <span class="info-value-secondary">${cliente.email}</span>
       </div>
       ` : ''}
       ${codigo ? `
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid ${COLORS.terracota}40;">
-        <span style="font-weight: 800; color: ${COLORS.terracota}; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Urbanist', sans-serif;">Código do Teste</span>
-        <span style="font-weight: 700; color: ${COLORS.cream}; font-size: 15px; font-family: 'Courier New', monospace; letter-spacing: 2px;">${codigo}</span>
+      <div class="info-row">
+        <span class="info-label">Código do Teste</span>
+        <span class="info-value" style="font-family: 'Courier New', monospace; letter-spacing: 1px;">${codigo}</span>
       </div>
       ` : ''}
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-weight: 800; color: ${COLORS.terracota}; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; font-family: 'Urbanist', sans-serif;">Data do Teste</span>
-        <span style="font-weight: 500; color: ${COLORS.creamDark}; font-size: 15px; font-family: 'Urbanist', sans-serif;">${dataTeste}</span>
+      <div class="info-row">
+        <span class="info-label">Data do Teste</span>
+        <span class="info-value-secondary">${dataTeste}</span>
       </div>
     </div>
     
     <!-- Fatores -->
-    <div style="margin-bottom: 32px;">
-      <div style="font-size: 22px; font-weight: 800; color: ${COLORS.cream}; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 3px solid ${COLORS.terracota}; font-family: 'Urbanist', sans-serif;">
-        5 Fatores Principais
-      </div>
+    <div class="fatores-section">
+      <div class="section-title">5 Fatores Principais</div>
       ${fatoresHTML}
       ${interpretacaoHTML}
     </div>
     
-    <!-- Facetas -->
+    <!-- Facetas - sempre em nova página para treinadora -->
     ${facetasHTML}
     
-    <!-- Protocolos -->
-    <div style="margin-bottom: 32px; margin-top: 32px;">
-      <div style="font-size: 22px; font-weight: 800; color: ${COLORS.cream}; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 3px solid ${COLORS.terracota}; font-family: 'Urbanist', sans-serif;">
-        Protocolos Recomendados
-      </div>
+    <!-- Protocolos - sempre em nova página -->
+    <div class="page-break-before protocolos-section">
+      <div class="section-title">Protocolos Recomendados</div>
       ${protocolosHTML}
     </div>
     
     <!-- Footer -->
-    <div style="margin-top: 48px; padding-top: 28px; border-top: 2px solid ${COLORS.terracota}60; text-align: center;">
-      <div style="font-size: 18px; font-weight: 800; color: ${COLORS.cream}; margin-bottom: 8px; letter-spacing: 3px; font-family: 'Urbanist', sans-serif;">ARTIO · DECIFRA</div>
-      <div style="font-size: 13px; color: ${COLORS.creamDark}; margin-bottom: 6px; font-style: italic; font-family: 'Urbanist', sans-serif;">Relatório gerado em ${new Date().toLocaleString('pt-BR')}</div>
-      <div style="font-size: 12px; color: ${COLORS.creamDark}aa; font-family: 'Urbanist', sans-serif;">© 2025 Todos os direitos reservados</div>
+    <div class="footer">
+      <div class="footer-brand">ÁRTIO · DECIFRA</div>
+      <div class="footer-date">Relatório gerado em ${new Date().toLocaleString('pt-BR')}</div>
+      <div class="footer-copyright">© 2025 Todos os direitos reservados</div>
       
       ${!isTreinadora ? `
-      <div style="margin-top: 20px; padding: 18px; background: ${cardBackground}; border-radius: 14px; border: 1px solid ${COLORS.terracota}60;">
-        <div style="font-size: 13px; color: ${COLORS.creamDark}; font-style: italic; line-height: 1.6; font-family: 'Urbanist', sans-serif;">
+      <div class="footer-notice">
+        <div class="footer-notice-text">
           Este é um relatório resumido. Sua treinadora tem acesso à análise completa com as 30 facetas e contexto profissional ampliado.
         </div>
       </div>

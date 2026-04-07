@@ -14,133 +14,171 @@
 
     body {
       font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: #2D1518;
-      color: #F5F0E8;
-      line-height: 1.6;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      line-height: 1.5;
       font-size: 14px;
     }
 
+    /* Configuração de página A4 */
+    @page {
+      size: A4;
+      margin: 25mm 25mm 30mm 25mm;
+    }
+
     .page {
-      width: 210mm;
-      min-height: 297mm;
-      padding: 20mm;
+      width: 100%;
+      max-width: 160mm;
       margin: 0 auto;
-      background-color: #2D1518;
-      page-break-after: always;
+      padding: 0 15px;
+      background-color: #ffffff;
     }
 
-    .page:last-child {
-      page-break-after: avoid;
-    }
-
-    /* Header */
+    /* Header com mais espaçamento */
     .header {
       text-align: center;
-      padding-bottom: 30px;
-      border-bottom: 2px solid #C4785A;
+      padding: 30px 0;
       margin-bottom: 30px;
+      border-bottom: 3px solid #C4785A;
     }
 
     .logo {
-      width: 120px;
-      height: auto;
-      margin-bottom: 20px;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: #f8f5f2;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #C4785A;
+    }
+
+    .logo-text {
+      font-size: 36px;
+      font-weight: 800;
+      color: #C4785A;
     }
 
     .header h1 {
-      font-size: 28px;
-      font-weight: 600;
-      color: #F5F0E8;
-      margin-bottom: 10px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
     }
 
     .header .subtitle {
-      font-size: 16px;
-      color: #C4785A;
+      font-size: 13px;
+      color: #666666;
       font-weight: 400;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #C4785A;
+      color: #ffffff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     /* Info Section */
     .info-section {
-      background: rgba(196, 120, 90, 0.1);
-      border-radius: 12px;
-      padding: 20px;
+      background: #f8f5f2;
+      border-radius: 14px;
+      padding: 24px 28px;
       margin-bottom: 30px;
-      border: 1px solid rgba(196, 120, 90, 0.3);
+      border: 1px solid #e8e0d8;
     }
 
     .info-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      gap: 12px;
     }
 
     .info-item {
       display: flex;
       flex-direction: column;
+      padding: 10px 0;
+      border-bottom: 1px solid #e8e0d8;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
     }
 
     .info-label {
-      font-size: 12px;
+      font-size: 11px;
       color: #C4785A;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
+      font-weight: 700;
     }
 
     .info-value {
-      font-size: 16px;
-      font-weight: 500;
-      color: #F5F0E8;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
     }
 
     /* Section Title */
     .section-title {
-      font-size: 22px;
-      font-weight: 600;
-      color: #C4785A;
+      font-size: 18px;
+      font-weight: 800;
+      color: #1a1a1a;
       margin: 30px 0 20px 0;
       padding-bottom: 10px;
-      border-bottom: 1px solid rgba(196, 120, 90, 0.3);
+      border-bottom: 3px solid #C4785A;
     }
 
     /* Fatores Grid */
     .fatores-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 20px;
+      gap: 12px;
     }
 
     .fator-card {
-      background: rgba(245, 240, 232, 0.05);
+      background: #fafafa;
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px 22px;
+      border: 1px solid #e8e0d8;
       border-left: 4px solid;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .fator-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .fator-info {
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 12px;
     }
 
     .fator-sigla {
-      width: 50px;
-      height: 50px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 700;
-      color: #2D1518;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .fator-titulo {
@@ -149,14 +187,14 @@
     }
 
     .fator-nome {
-      font-size: 18px;
-      font-weight: 600;
-      color: #F5F0E8;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
     }
 
     .fator-classificacao {
-      font-size: 13px;
-      color: #C4785A;
+      font-size: 12px;
+      color: #666666;
       margin-top: 2px;
     }
 
@@ -165,103 +203,110 @@
     }
 
     .score-valor {
-      font-size: 28px;
-      font-weight: 700;
-      color: #F5F0E8;
+      font-size: 24px;
+      font-weight: 800;
+      color: #1a1a1a;
     }
 
     .score-label {
-      font-size: 12px;
-      color: #888;
+      font-size: 11px;
+      color: #888888;
     }
 
     /* Progress Bar */
     .progress-container {
       width: 100%;
-      height: 8px;
-      background: rgba(245, 240, 232, 0.1);
-      border-radius: 4px;
+      height: 10px;
+      background: #e8e0d8;
+      border-radius: 5px;
       overflow: hidden;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .progress-fill {
       height: 100%;
-      border-radius: 4px;
-      transition: width 0.3s ease;
+      border-radius: 5px;
     }
 
     /* Protocolos Section */
+    .protocolos-section {
+      page-break-before: always;
+      break-before: page;
+      margin-top: 40px;
+    }
+
     .protocolos-intro {
-      font-size: 15px;
-      color: #F5F0E8;
-      margin-bottom: 25px;
-      line-height: 1.8;
+      font-size: 14px;
+      color: #555555;
+      margin-bottom: 20px;
+      line-height: 1.6;
     }
 
     .protocolo-card {
-      background: rgba(245, 240, 232, 0.03);
+      background: #fafafa;
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      border: 1px solid rgba(196, 120, 90, 0.2);
+      padding: 18px 22px;
+      margin-bottom: 12px;
+      border: 1px solid #e8e0d8;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .protocolo-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .prioridade-badge {
       padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
+      border-radius: 16px;
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .prioridade-1 {
       background: #C4785A;
-      color: #2D1518;
+      color: #ffffff;
     }
 
     .prioridade-2 {
       background: #D4A574;
-      color: #2D1518;
+      color: #1a1a1a;
     }
 
     .prioridade-3 {
       background: #7B9E87;
-      color: #2D1518;
+      color: #ffffff;
     }
 
     .faceta-tag {
-      font-size: 12px;
-      color: #888;
+      font-size: 11px;
+      color: #666666;
     }
 
     .protocolo-titulo {
-      font-size: 17px;
-      font-weight: 600;
-      color: #F5F0E8;
-      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
     }
 
     .protocolo-descricao {
-      font-size: 14px;
-      color: #ccc;
-      margin-bottom: 15px;
-      line-height: 1.6;
+      font-size: 13px;
+      color: #555555;
+      margin-bottom: 12px;
+      line-height: 1.5;
     }
 
     .exercicios-title {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 12px;
+      font-weight: 700;
       color: #C4785A;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -272,11 +317,12 @@
     }
 
     .exercicios-list li {
-      padding: 8px 0 8px 25px;
+      padding: 6px 0 6px 20px;
       position: relative;
-      font-size: 13px;
-      color: #ddd;
-      border-bottom: 1px solid rgba(245, 240, 232, 0.05);
+      font-size: 12px;
+      color: #444444;
+      border-bottom: 1px solid #f0f0f0;
+      line-height: 1.4;
     }
 
     .exercicios-list li:last-child {
@@ -288,72 +334,64 @@
       position: absolute;
       left: 0;
       color: #C4785A;
-      font-weight: 600;
+      font-weight: 700;
     }
 
-    /* Footer */
+    /* Footer com mais espaçamento */
     .footer {
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(196, 120, 90, 0.2);
+      margin-top: 50px;
+      padding: 30px 0;
+      border-top: 2px solid rgba(196, 120, 90, 0.3);
       text-align: center;
-      font-size: 12px;
-      color: #666;
     }
 
     .footer-logo {
-      font-weight: 600;
+      font-size: 15px;
+      font-weight: 800;
       color: #C4785A;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
     }
 
-    /* Legend Page */
-    .legend-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-      margin-bottom: 20px;
-      padding: 15px;
-      background: rgba(245, 240, 232, 0.03);
-      border-radius: 8px;
+    .footer-date {
+      font-size: 11px;
+      color: #888888;
+      margin-bottom: 6px;
     }
 
-    .legend-sigla {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 16px;
-      color: #2D1518;
-      flex-shrink: 0;
-    }
-
-    .legend-content h4 {
-      font-size: 16px;
-      color: #F5F0E8;
-      margin-bottom: 5px;
-    }
-
-    .legend-content p {
-      font-size: 13px;
-      color: #aaa;
-      line-height: 1.5;
+    .footer-copyright {
+      font-size: 10px;
+      color: #888888;
     }
 
     /* Print styles */
     @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
       body {
-        background: #2D1518;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
+        background: #ffffff !important;
       }
       
       .page {
-        width: 100%;
-        padding: 15mm;
+        padding: 0;
+        margin: 0;
+      }
+
+      .fator-card, .protocolo-card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .protocolos-section {
+        page-break-before: always;
+        break-before: page;
+      }
+
+      .exercicios-list li {
+        break-inside: avoid;
       }
     }
   </style>
@@ -362,12 +400,12 @@
   <!-- Página 1: Capa e Resumo -->
   <div class="page">
     <div class="header">
-      <!-- Logo placeholder - será substituído pela imagem real -->
-      <div style="width: 120px; height: 120px; margin: 0 auto 20px; background: rgba(196, 120, 90, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #C4785A;">
-        <span style="font-size: 48px; color: #C4785A;">Á</span>
+      <div class="logo">
+        <span class="logo-text">Á</span>
       </div>
-      <h1>Relatório de Personalidade</h1>
-      <p class="subtitle">Avaliação baseada no modelo IPIP-NEO-120</p>
+      <h1>DECIFRA</h1>
+      <p class="subtitle">Avaliação de Personalidade Big Five</p>
+      <span class="badge">Relatório do Cliente</span>
     </div>
 
     <div class="info-section">
@@ -424,7 +462,7 @@
   </div>
 
   <!-- Página 2: Protocolos Recomendados -->
-  <div class="page">
+  <div class="protocolos-section">
     <h2 class="section-title">Protocolos de Desenvolvimento</h2>
     
     <p class="protocolos-intro">
@@ -436,7 +474,7 @@
     <div class="protocolo-card">
       <div class="protocolo-header">
         <span class="prioridade-badge prioridade-{{this.prioridade}}">
-          Prioridade {{this.prioridade}}
+          P{{this.prioridade}}
         </span>
         <span class="faceta-tag">Faceta {{this.faceta}}</span>
       </div>
@@ -453,9 +491,9 @@
     {{/each}}
 
     <div class="footer">
-      <div class="footer-logo">Ártio</div>
-      <p>Relatório gerado em {{formatDate dataGeracao}}</p>
-      <p>Este relatório é confidencial e destinado ao uso pessoal.</p>
+      <div class="footer-logo">ÁRTIO · DECIFRA</div>
+      <p class="footer-date">Relatório gerado em {{formatDate dataGeracao}}</p>
+      <p class="footer-copyright">© 2025 Todos os direitos reservados</p>
     </div>
   </div>
 </body>
