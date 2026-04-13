@@ -58,13 +58,20 @@ import { useState } from 'react';
           return;
         }
 
-        await supabase
+        const { error: codigoUpdateError } = await supabase
           .from('codigos')
           .update({
             usado: true,
             cliente_id: clienteData.id,
           })
           .eq('id', codigoId);
+
+        if (codigoUpdateError) {
+          console.error('Erro ao atualizar código:', codigoUpdateError);
+          Alert.alert('Erro', 'Não foi possível ativar seu código. Tente novamente.');
+          setLoading(false);
+          return;
+        }
 
         await AsyncStorage.setItem('clienteId', clienteData.id);
 

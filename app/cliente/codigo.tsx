@@ -162,6 +162,35 @@ export default function ClienteCodigoScreen() {
         return;
       }
 
+      // Verificação extra: mesmo que usado=false, checar se já existe cliente/resultado para esse código
+      const { data: clienteExistente } = await supabase
+        .from('clientes')
+        .select('id')
+        .eq('codigo_id', codigoData.id)
+        .maybeSingle();
+
+      if (clienteExistente) {
+        const { data: resultadoExistente } = await supabase
+          .from('resultados')
+          .select('id')
+          .eq('cliente_id', clienteExistente.id)
+          .maybeSingle();
+
+        if (resultadoExistente) {
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setInputState('valid');
+          router.push({
+            pathname: '/cliente/resultado',
+            params: {
+              clienteId: clienteExistente.id,
+              resultadoId: resultadoExistente.id,
+            },
+          });
+          setLoading(false);
+          return;
+        }
+      }
+
       // Código válido!
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setInputState('valid');
