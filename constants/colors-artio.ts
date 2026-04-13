@@ -168,6 +168,8 @@ export const STATION_THEMES = {
     icon: 'cloud',
     element: 'air',
     description: 'Exploramos seus padrões de pensamento, criatividade e forma de processar informações.',
+    textPrimary: COLORS_ARTIO.vinhoDeep,
+    textSecondary: COLORS_ARTIO.vinhoDark,
   },
   2: {
     id: 2,
@@ -178,6 +180,8 @@ export const STATION_THEMES = {
     icon: 'mountain',
     element: 'earth',
     description: 'Entendemos seus hábitos, ritmos e maneira de se relacionar com o mundo físico.',
+    textPrimary: COLORS_ARTIO.vinhoDeep,
+    textSecondary: COLORS_ARTIO.vinhoDark,
   },
   3: {
     id: 3,
@@ -188,6 +192,8 @@ export const STATION_THEMES = {
     icon: 'water',
     element: 'water',
     description: 'Mapeamos sua forma de criar vínculos, expressar emoções e se conectar com outros.',
+    textPrimary: COLORS_ARTIO.creamLight,
+    textSecondary: COLORS_ARTIO.cream,
   },
   4: {
     id: 4,
@@ -198,6 +204,8 @@ export const STATION_THEMES = {
     icon: 'flame',
     element: 'fire',
     description: 'Revelamos seus padrões de reação, impulsos e forma de lidar com desafios.',
+    textPrimary: COLORS_ARTIO.creamLight,
+    textSecondary: COLORS_ARTIO.cream,
   },
 } as const;
 

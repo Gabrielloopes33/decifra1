@@ -133,6 +133,7 @@ import { useState } from 'react';
                     style={[styles.button, loading && styles.buttonDisabled]}
                     onPress={handleCadastro}
                     disabled={loading}
+                    activeOpacity={0.8}
                   >
                     {loading ? (
                       <ActivityIndicator color={COLORS.accent} />
@@ -186,58 +187,58 @@ import { useState } from 'react';
       backgroundColor: COLORS.cardBg,
       borderWidth: 1,
       borderColor: COLORS.cardBorder,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: 18,
+      paddingVertical: 10,
       borderRadius: 20,
-      marginBottom: 24,
+      marginBottom: 28,
     },
     badgeText: {
-      fontSize: 14,
+      fontSize: 15,
       fontWeight: '600',
       color: COLORS.accent,
       letterSpacing: 1,
     },
     title: {
-      fontSize: 32,
+      fontSize: 34,
       fontWeight: 'bold',
       color: COLORS.creamLight,
-      marginBottom: 12,
+      marginBottom: 14,
       textAlign: 'center',
     },
     subtitle: {
-      fontSize: 16,
+      fontSize: 17,
       color: COLORS.cream,
-      opacity: 0.9,
-      marginBottom: 40,
+      opacity: 0.95,
+      marginBottom: 44,
       textAlign: 'center',
-      lineHeight: 24,
+      lineHeight: 26,
     },
     form: {
       width: '100%',
     },
     inputGroup: {
-      marginBottom: 20,
+      marginBottom: 22,
     },
     label: {
-      fontSize: 14,
+      fontSize: 15,
       color: COLORS.cream,
-      marginBottom: 8,
+      marginBottom: 10,
       fontWeight: '600',
     },
     input: {
       backgroundColor: COLORS.inputBg,
       borderWidth: 1,
       borderColor: COLORS.inputBorder,
-      paddingVertical: 16,
+      paddingVertical: 18,
       paddingHorizontal: 20,
-      borderRadius: 12,
-      fontSize: 16,
+      borderRadius: 14,
+      fontSize: 17,
       color: COLORS.creamLight,
     },
     button: {
-      borderRadius: 12,
+      borderRadius: 14,
       overflow: 'hidden',
-      marginTop: 8,
+      marginTop: 10,
       shadowColor: COLORS.accent,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
@@ -245,30 +246,30 @@ import { useState } from 'react';
       elevation: 5,
     },
     buttonGradient: {
-      paddingVertical: 18,
+      paddingVertical: 20,
       alignItems: 'center',
-      borderRadius: 12,
+      borderRadius: 14,
     },
     buttonDisabled: {
       opacity: 0.7,
     },
     buttonText: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: '600',
       color: COLORS.creamLight,
     },
     privacyBox: {
-      marginTop: 32,
-      padding: 16,
+      marginTop: 36,
+      padding: 18,
       backgroundColor: COLORS.cardBg,
-      borderRadius: 12,
+      borderRadius: 14,
       borderWidth: 1,
       borderColor: COLORS.cardBorder,
     },
     privacyText: {
-      fontSize: 13,
+      fontSize: 14,
       color: COLORS.cream,
       textAlign: 'center',
-      lineHeight: 20,
+      lineHeight: 22,
     },
   });

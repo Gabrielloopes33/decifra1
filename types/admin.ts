@@ -24,7 +24,6 @@ export interface TreinadoraAdmin {
   id: string;
   nome: string;
   email: string;
-  creditos: number;
   totalCodigos: number;
   totalClientes: number;
   created_at: string;

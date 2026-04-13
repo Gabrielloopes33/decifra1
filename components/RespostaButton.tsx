@@ -15,6 +15,8 @@ interface RespostaButtonProps {
   label: string;
   isSelected: boolean;
   themeColor: string;
+  selectedTextColor?: string;
+  defaultTextColor?: string;
   onPress: () => void;
 }
 
@@ -23,6 +25,8 @@ export function RespostaButton({
   label,
   isSelected,
   themeColor,
+  selectedTextColor = COLORS.creamLight,
+  defaultTextColor = COLORS.cream,
   onPress,
 }: RespostaButtonProps) {
   const handlePress = () => {
@@ -43,10 +47,10 @@ export function RespostaButton({
       onPress={handlePress}
       activeOpacity={0.8}
     >
-      <Text style={[styles.valor, { color: isSelected ? COLORS.creamLight : COLORS.cream }]}>
+      <Text style={[styles.valor, { color: isSelected ? selectedTextColor : defaultTextColor }]}>
         {valor}
       </Text>
-      <Text style={[styles.label, { color: isSelected ? COLORS.creamLight : 'rgba(245, 240, 230, 0.7)' }]}>
+      <Text style={[styles.label, { color: isSelected ? selectedTextColor : 'rgba(245, 240, 230, 0.9)' }]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -58,21 +62,21 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    paddingVertical: 14,
     paddingHorizontal: 2,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    minHeight: 70,
+    minHeight: 88,
   },
   valor: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   label: {
-    fontSize: 9,
+    fontSize: 10,
     textAlign: 'center',
-    lineHeight: 12,
+    lineHeight: 14,
     fontWeight: '500',
   },
 });

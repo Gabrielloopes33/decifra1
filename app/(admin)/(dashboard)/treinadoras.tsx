@@ -43,18 +43,13 @@ export default function TreinadorasScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [novaTreinadora, setNovaTreinadora] = useState({
     nome: '',
-    email: '',
-    creditos: '0'
+    email: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Estados para o menu de ações
   const [menuVisible, setMenuVisible] = useState(false);
   const [treinadoraSelecionada, setTreinadoraSelecionada] = useState<TreinadoraAdmin | null>(null);
-
-  // Estados para o modal de adicionar créditos
-  const [creditosModalVisible, setCreditosModalVisible] = useState(false);
-  const [creditosAdicionar, setCreditosAdicionar] = useState('0');
 
   // Estados para o modal de editar treinadora
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -82,53 +77,6 @@ export default function TreinadorasScreen() {
   const handleOpenMenu = (treinadora: TreinadoraAdmin) => {
     setTreinadoraSelecionada(treinadora);
     setMenuVisible(true);
-  };
-
-  // Abrir modal de adicionar créditos
-  const handleOpenCreditos = () => {
-    if (!treinadoraSelecionada) return;
-    setCreditosAdicionar('0');
-    setMenuVisible(false);
-    setCreditosModalVisible(true);
-  };
-
-  // Função para adicionar créditos
-  const handleAdicionarCreditos = async () => {
-    if (!treinadoraSelecionada) return;
-    
-    const creditosNum = parseInt(creditosAdicionar) || 0;
-    if (creditosNum <= 0) {
-      Alert.alert('Erro', 'Digite um valor maior que 0');
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      const novosCreditos = treinadoraSelecionada.creditos + creditosNum;
-      
-      const { error } = await supabase
-        .from('treinadoras')
-        .update({ creditos: novosCreditos })
-        .eq('id', treinadoraSelecionada.id);
-
-      if (error) throw error;
-
-      Alert.alert(
-        'Sucesso', 
-        `${creditosNum} crédito(s) adicionado(s)!\n\nTotal atual: ${novosCreditos} créditos`
-      );
-      
-      setCreditosModalVisible(false);
-      setTreinadoraSelecionada(null);
-      setCreditosAdicionar('0');
-      refetch();
-    } catch (error: any) {
-      console.error('Erro ao adicionar créditos:', error);
-      Alert.alert('Erro', error.message || 'Erro ao adicionar créditos');
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   // Abrir modal de editar
@@ -348,7 +296,6 @@ export default function TreinadorasScreen() {
         .insert({
           nome: novaTreinadora.nome.trim(),
           email: novaTreinadora.email.trim(),
-          creditos: parseInt(novaTreinadora.creditos) || 0,
           is_admin: false,
           auth_user_id: authData.user.id // ✅ Vínculo correto!
         });
@@ -368,7 +315,7 @@ export default function TreinadorasScreen() {
       );
       
       setModalVisible(false);
-      setNovaTreinadora({ nome: '', email: '', creditos: '0' });
+      setNovaTreinadora({ nome: '', email: '' });
       refetch(); // Recarrega a lista
     } catch (error: any) {
       console.error('Erro completo:', error);
@@ -567,16 +514,6 @@ export default function TreinadorasScreen() {
           onPress={() => setMenuVisible(false)}
         >
           <View style={styles.menuContainer}>
-            <TouchableOpacity style={styles.menuItem} onPress={handleOpenCreditos}>
-              <Text style={styles.menuItemIcon}>💰</Text>
-              <View style={styles.menuItemContent}>
-                <Text style={styles.menuItemTitle}>Adicionar Créditos</Text>
-                <Text style={styles.menuItemSubtitle}>Adicionar créditos à treinadora</Text>
-              </View>
-            </TouchableOpacity>
-            
-            <View style={styles.menuDivider} />
-            
             <TouchableOpacity style={styles.menuItem} onPress={handleOpenEditar}>
               <Text style={styles.menuItemIcon}>✎</Text>
               <View style={styles.menuItemContent}>
@@ -638,18 +575,6 @@ export default function TreinadorasScreen() {
                   onChangeText={(text) => setNovaTreinadora({...novaTreinadora, email: text})}
                 />
               </View>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Créditos Iniciais</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="0"
-                  placeholderTextColor={ADMIN_COLORS.textMuted}
-                  keyboardType="number-pad"
-                  value={novaTreinadora.creditos}
-                  onChangeText={(text) => setNovaTreinadora({...novaTreinadora, creditos: text})}
-                />
-              </View>
             </View>
 
             <View style={styles.modalFooter}>
@@ -669,76 +594,6 @@ export default function TreinadorasScreen() {
                   <ActivityIndicator size="small" color={ADMIN_COLORS.text} />
                 ) : (
                   <Text style={styles.modalBtnPrimaryText}>Criar Treinadora</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal para adicionar créditos */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={creditosModalVisible}
-        onRequestClose={() => setCreditosModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Adicionar Créditos</Text>
-              <TouchableOpacity onPress={() => setCreditosModalVisible(false)}>
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalBody}>
-              {treinadoraSelecionada && (
-                <>
-                  <View style={styles.infoBox}>
-                    <Text style={styles.infoLabel}>Treinadora:</Text>
-                    <Text style={styles.infoValue}>{treinadoraSelecionada.nome}</Text>
-                    <Text style={styles.infoLabel}>Créditos Atuais:</Text>
-                    <Text style={[styles.infoValue, styles.creditValue]}>
-                      {treinadoraSelecionada.creditos}
-                    </Text>
-                  </View>
-
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.inputLabel}>Quantidade a Adicionar</Text>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Ex: 10"
-                      placeholderTextColor={ADMIN_COLORS.textMuted}
-                      keyboardType="number-pad"
-                      value={creditosAdicionar}
-                      onChangeText={setCreditosAdicionar}
-                    />
-                    <Text style={styles.inputHint}>
-                      Total após adição: {(treinadoraSelecionada.creditos + (parseInt(creditosAdicionar) || 0))} créditos
-                    </Text>
-                  </View>
-                </>
-              )}
-            </View>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity 
-                style={styles.modalBtnSecondary} 
-                onPress={() => setCreditosModalVisible(false)}
-                disabled={isSubmitting}
-              >
-                <Text style={styles.modalBtnSecondaryText}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalBtnPrimary, isSubmitting && styles.modalBtnDisabled]}
-                onPress={handleAdicionarCreditos}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <ActivityIndicator size="small" color={ADMIN_COLORS.text} />
-                ) : (
-                  <Text style={styles.modalBtnPrimaryText}>Adicionar Créditos</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -1301,33 +1156,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: ADMIN_COLORS.border,
     marginHorizontal: 16,
-  },
-  infoBox: {
-    backgroundColor: ADMIN_COLORS.card,
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: ADMIN_COLORS.border,
-  },
-  infoLabel: {
-    fontSize: 12,
-    color: ADMIN_COLORS.textMuted,
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: ADMIN_COLORS.text,
-    marginBottom: 12,
-  },
-  creditValue: {
-    color: ADMIN_COLORS.success,
-    fontSize: 24,
-  },
-  inputHint: {
-    fontSize: 12,
-    color: ADMIN_COLORS.textMuted,
-    marginTop: 8,
   },
 });

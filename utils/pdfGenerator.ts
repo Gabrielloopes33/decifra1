@@ -329,7 +329,7 @@ function gerarTemplateHTML(dados: PDFData): string {
           <span style="font-size: 12px; color: ${COLORS.textMuted}; font-family: 'Urbanist', sans-serif;">Percentil</span>
           <span style="font-size: 18px; color: ${fatorCor}; font-weight: 800; font-family: 'Urbanist', sans-serif;">${f.percentil}%</span>
         </div>
-        ${isTreinadora ? `<div style="font-size: 11px; color: ${COLORS.textMuted}; margin-top: 4px; text-align: right; font-style: italic; font-family: 'Urbanist', sans-serif;">Score: ${f.score.toFixed(2)}</div>` : ''}
+        ${isTreinadora ? `<div style="font-size: 11px; color: ${COLORS.textMuted}; margin-top: 4px; text-align: right; font-style: italic; font-family: 'Urbanist', sans-serif;">Score: ${Math.round(f.score)}</div>` : ''}
       </div>
     </div>
   `}).join('');

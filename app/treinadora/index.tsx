@@ -21,7 +21,6 @@ import { useState, useEffect, useCallback } from 'react';
     id: string;
     nome: string;
     email: string;
-    creditos: number;
   }
 
   interface Cliente {
@@ -101,7 +100,6 @@ import { useState, useEffect, useCallback } from 'react';
               .insert({
                 email: user.email || '',
                 nome: user.email?.split('@')[0] || 'Treinadora',
-                creditos: 5, // Créditos iniciais
                 auth_user_id: user.id,
               })
               .select()
@@ -131,7 +129,7 @@ import { useState, useEffect, useCallback } from 'react';
               setTreinadora(novaTreinadora);
               Alert.alert(
                 'Bem-vinda!',
-                'Seu perfil foi criado automaticamente. Você recebeu 5 créditos para começar!'
+                'Sua conta foi criada com sucesso!'
               );
             }
           }
@@ -195,10 +193,11 @@ import { useState, useEffect, useCallback } from 'react';
     const gerarCodigo = async () => {
       if (!treinadora) return;
 
-      if (treinadora.creditos <= 0) {
+      const codigosDisponiveis = meusCodigosData?.total ?? 0;
+      if (codigosDisponiveis <= 0) {
         Alert.alert(
-          'Sem créditos',
-          'Você não tem créditos suficientes para gerar um código. Compre mais créditos para continuar.',
+          'Sem códigos disponíveis',
+          'Você não tem códigos disponíveis. Entre em contato com o administrador para adquirir mais códigos.',
           [{ text: 'OK' }]
         );
         return;
@@ -207,59 +206,42 @@ import { useState, useEffect, useCallback } from 'react';
       setGerandoCodigo(true);
 
       try {
-        const { data: codigoData, error: codigoError } = await supabase
-          .rpc('gerar_codigo_unico');
-
-        if (codigoError) {
-          console.error('Erro ao gerar código:', codigoError);
-          Alert.alert('Erro', 'Não foi possível gerar o código');
-          setGerandoCodigo(false);
-          return;
-        }
-
-        const codigoGerado = codigoData as string;
+        // PEGA O PRIMEIRO CÓDIGO DISPONÍVEL DA LISTA
+        const codigoParaDistribuir = meusCodigosData?.disponiveis[0];
         
-        const validoAte = new Date();
-        validoAte.setDate(validoAte.getDate() + 30);
-
-        const { error: insertError } = await supabase
-          .from('codigos')
-          .insert({
-            codigo: codigoGerado,
-            treinadora_id: treinadora.id,
-            valido_ate: validoAte.toISOString(),
-          });
-
-        if (insertError) {
-          console.error('Erro ao salvar código:', insertError);
-          Alert.alert('Erro', 'Não foi possível salvar o código');
+        if (!codigoParaDistribuir) {
+          Alert.alert('Erro', 'Não foi possível encontrar um código disponível');
           setGerandoCodigo(false);
           return;
         }
 
+        // MARCA O CÓDIGO COMO DISTRIBUÍDO
         const { error: updateError } = await supabase
-          .from('treinadoras')
-          .update({ creditos: treinadora.creditos - 1 })
-          .eq('id', treinadora.id);
+          .from('codigos')
+          .update({ distribuido: true })
+          .eq('id', codigoParaDistribuir.id);
 
         if (updateError) {
-          console.error('Erro ao atualizar créditos:', updateError);
+          console.error('Erro ao distribuir código:', updateError);
+          Alert.alert('Erro', 'Não foi possível resgatar o código');
+          setGerandoCodigo(false);
+          return;
         }
 
-        setTreinadora({ ...treinadora, creditos: treinadora.creditos - 1 });
+        // ATUALIZA A LISTA E MOSTRA O CÓDIGO
         await refetchMeusCodigos();
-        setUltimoCodigoGerado(codigoGerado);
-        setUltimoCodigoValidoAte(validoAte.toLocaleDateString('pt-BR'));
+        setUltimoCodigoGerado(codigoParaDistribuir.codigo);
+        setUltimoCodigoValidoAte(new Date(codigoParaDistribuir.validoAte).toLocaleDateString('pt-BR'));
         setCodigoGeradoCopiado(false);
 
         Alert.alert(
-          'Código gerado!',
-          `Código: ${codigoGerado}\n\nVálido até: ${validoAte.toLocaleDateString('pt-BR')}\n\nUse o cartão abaixo para copiar e compartilhar com seu cliente.`,
+          'Código resgatado!',
+          `Código: ${codigoParaDistribuir.codigo}\n\nVálido até: ${new Date(codigoParaDistribuir.validoAte).toLocaleDateString('pt-BR')}\n\nUse o cartão abaixo para copiar e compartilhar com seu cliente.`,
           [{ text: 'OK' }]
         );
       } catch (error: any) {
-        console.error('Erro ao gerar código:', error);
-        Alert.alert('Erro', 'Ocorreu um erro ao gerar o código');
+        console.error('Erro ao resgatar código:', error);
+        Alert.alert('Erro', 'Ocorreu um erro ao resgatar o código');
       } finally {
         setGerandoCodigo(false);
       }
@@ -336,9 +318,8 @@ import { useState, useEffect, useCallback } from 'react';
         >
           <View style={styles.creditCard}>
             <View style={styles.creditInfo}>
-              <Text style={styles.creditLabel}>Saldo de Créditos</Text>
-              <Text style={styles.creditValue}>{treinadora.creditos}</Text>
-              <Text style={styles.creditSecondaryLabel}>Códigos Ativos: {codigosAtivos}</Text>
+              <Text style={styles.creditLabel}>Códigos Disponíveis</Text>
+              <Text style={styles.creditValue}>{codigosAtivos}</Text>
             </View>
             <TouchableOpacity
               style={[styles.generateButton, gerandoCodigo && styles.buttonDisabled]}
@@ -348,14 +329,14 @@ import { useState, useEffect, useCallback } from 'react';
               {gerandoCodigo ? (
                 <ActivityIndicator color={COLORS.accent} />
               ) : (
-                <Text style={styles.generateButtonText}>Gerar Código</Text>
+                <Text style={styles.generateButtonText}>Resgatar Código</Text>
               )}
             </TouchableOpacity>
           </View>
 
           {ultimoCodigoGerado && (
             <View style={styles.codigoGeradoCard}>
-              <Text style={styles.codigoGeradoTitle}>Ultimo codigo gerado</Text>
+              <Text style={styles.codigoGeradoTitle}>Ultimo codigo resgatado</Text>
               <Text style={styles.codigoGeradoValue}>{ultimoCodigoGerado}</Text>
               <Text style={styles.codigoGeradoValidade}>
                 Valido ate: {ultimoCodigoValidoAte}

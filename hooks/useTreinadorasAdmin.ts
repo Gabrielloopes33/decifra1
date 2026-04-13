@@ -42,7 +42,7 @@ async function fetchTreinadorasAdmin(): Promise<TreinadoraAdmin[]> {
   // Tenta buscar treinadoras excluindo admins (query principal)
   let { data: treinadoras, error: treinadorasError } = await supabase
     .from('treinadoras')
-    .select('id, nome, email, creditos, created_at, is_admin')
+    .select('id, nome, email, created_at, is_admin')
     .eq('is_admin', false)
     .order('created_at', { ascending: false });
 
@@ -52,7 +52,7 @@ async function fetchTreinadorasAdmin(): Promise<TreinadoraAdmin[]> {
     
     const fallbackResult = await supabase
       .from('treinadoras')
-      .select('id, nome, email, creditos, created_at, is_admin')
+      .select('id, nome, email, created_at, is_admin')
       .order('created_at', { ascending: false });
     
     if (fallbackResult.error) {

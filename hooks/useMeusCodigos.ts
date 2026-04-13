@@ -74,6 +74,7 @@ export function useMeusCodigos(treinadoraId?: string) {
         .select('id, codigo, valido_ate')
         .eq('treinadora_id', treinadoraId)
         .eq('usado', false)
+        .eq('distribuido', false)
         .gt('valido_ate', new Date().toISOString())
         .order('created_at', { ascending: true });
 

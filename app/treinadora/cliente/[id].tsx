@@ -13,7 +13,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { supabase } from '@/lib/supabase/client';
 import { Mandala } from '@/components/ui/Mandala';
-import { FATORES } from '@/constants/ipip';
+import { FATORES, FACETAS, FACETAS_DESCRICAO } from '@/constants/ipip';
 import type { FatorKey } from '@/constants/ipip';
   import { PROTOCOLOS } from '@/constants/protocolos';
   import { getInterpretacao, type Faixa } from '@/constants/interpretacoes';
@@ -51,6 +51,10 @@ interface Protocolo {
   titulo: string;
   descricao: string;
   prioridade: number;
+  motivo?: string;
+  faceta?: string;
+  facetaNome?: string;
+  tipoLabel?: string;
 }
 
 export default function TreinadoraClienteResultadoScreen() {
@@ -126,6 +130,10 @@ export default function TreinadoraClienteResultadoScreen() {
               titulo: protocolo.titulo,
               descricao: protocolo.descricao,
               prioridade: p.prioridade,
+              motivo: p.motivo,
+              faceta: protocolo.faceta,
+              facetaNome: protocolo.facetaNome,
+              tipoLabel: protocolo.tipoLabel,
             };
           })
           .filter((p): p is Protocolo => p !== null)
@@ -141,6 +149,10 @@ export default function TreinadoraClienteResultadoScreen() {
             titulo: rec.protocolo.titulo,
             descricao: rec.protocolo.descricao,
             prioridade: index + 1,
+            motivo: rec.motivo,
+            faceta: rec.protocolo.faceta,
+            facetaNome: rec.protocolo.facetaNome,
+            tipoLabel: rec.protocolo.tipoLabel,
           }));
 
         setProtocolos(protocolosFallback);
@@ -310,7 +322,7 @@ export default function TreinadoraClienteResultadoScreen() {
                       Percentil: {scoreFator.percentil}
                     </Text>
                     <Text style={styles.scoreText}>
-                      Score: {scoreFator.score.toFixed(1)}
+                      Score: {Math.round(scoreFator.score)}
                     </Text>
                   </View>
                 </View>
@@ -338,27 +350,44 @@ export default function TreinadoraClienteResultadoScreen() {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>30 Facetas Detalhadas</Text>
               
-              {resultado.scores_facetas.map((faceta) => (
-                <View key={faceta.faceta} style={styles.facetaCard}>
-                  <View style={styles.facetaHeader}>
-                    <Text style={styles.facetaCodigo}>{faceta.faceta}</Text>
-                    <Text style={styles.facetaClassificacao}>
-                      {faceta.classificacao}
-                    </Text>
+              {resultado.scores_facetas.map((faceta) => {
+                const nomeFaceta = FACETAS[faceta.faceta as keyof typeof FACETAS];
+                const descricaoFaceta = FACETAS_DESCRICAO[faceta.faceta as keyof typeof FACETAS_DESCRICAO];
+                
+                return (
+                  <View key={faceta.faceta} style={styles.facetaCard}>
+                    <View style={styles.facetaHeader}>
+                      <Text style={styles.facetaNome}>
+                        {faceta.faceta} - {nomeFaceta}
+                      </Text>
+                      <Text style={styles.facetaClassificacao}>
+                        {faceta.classificacao}
+                      </Text>
+                    </View>
+                    <View style={styles.percentilBarSmall}>
+                      <View
+                        style={[
+                          styles.percentilFillSmall,
+                          { width: `${faceta.percentil}%` },
+                        ]}
+                      />
+                    </View>
+                    <View style={styles.facetaFooter}>
+                      <Text style={styles.facetaPercentil}>
+                        Percentil: {faceta.percentil}º
+                      </Text>
+                      <Text style={styles.facetaScore}>
+                        Score: {faceta.score}/20
+                      </Text>
+                    </View>
+                    {descricaoFaceta && (
+                      <Text style={styles.facetaDescricao}>
+                        {descricaoFaceta}
+                      </Text>
+                    )}
                   </View>
-                  <View style={styles.percentilBarSmall}>
-                    <View
-                      style={[
-                        styles.percentilFillSmall,
-                        { width: `${faceta.percentil}%` },
-                      ]}
-                    />
-                  </View>
-                  <Text style={styles.facetaPercentil}>
-                    {faceta.percentil}º percentil
-                  </Text>
-                </View>
-              ))}
+                );
+              })}
             </View>
           )}
 
@@ -378,12 +407,33 @@ export default function TreinadoraClienteResultadoScreen() {
                 const prioridade = index < 3 ? 'alta' : 'media';
 
                 return (
-                  <ProtocoloCard
-                    key={protocolo.id}
-                    protocolo={protocoloCompleto}
-                    index={index}
-                    prioridade={prioridade}
-                  />
+                  <View key={protocolo.id} style={styles.protocoloWrapper}>
+                    {/* Badge da Faceta e Tipo */}
+                    {(protocolo.faceta || protocolo.facetaNome) && (
+                      <View style={styles.facetaBadge}>
+                        <Text style={styles.facetaBadgeText}>
+                          {protocolo.faceta && protocolo.facetaNome
+                            ? `${protocolo.faceta} - ${protocolo.facetaNome}`
+                            : protocolo.faceta || protocolo.facetaNome}
+                          {protocolo.tipoLabel ? `  •  ${protocolo.tipoLabel}` : ''}
+                        </Text>
+                      </View>
+                    )}
+                    
+                    {/* Motivo da Recomendação */}
+                    {protocolo.motivo && (
+                      <View style={styles.motivoContainer}>
+                        <Text style={styles.motivoIcon}>💡</Text>
+                        <Text style={styles.motivoText}>{protocolo.motivo}</Text>
+                      </View>
+                    )}
+                    
+                    <ProtocoloCard
+                      protocolo={protocoloCompleto}
+                      index={index}
+                      prioridade={prioridade}
+                    />
+                  </View>
                 );
               })
             ) : (
@@ -612,6 +662,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: COLORS.cream,
   },
+  facetaNome: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: COLORS.cream,
+    flex: 1,
+    marginRight: 8,
+  },
+  facetaFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  facetaScore: {
+    fontSize: 13,
+    color: COLORS.accent,
+    fontWeight: '600',
+  },
+  facetaDescricao: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+    marginTop: 4,
+  },
   facetaClassificacao: {
     fontSize: 12,
     color: COLORS.accent,
@@ -758,5 +831,45 @@ const styles = StyleSheet.create({
   },
   botaoDisabled: {
     opacity: 0.7,
+  },
+  protocoloWrapper: {
+    marginBottom: 16,
+  },
+  facetaBadge: {
+    backgroundColor: 'rgba(196, 90, 61, 0.25)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(196, 90, 61, 0.4)',
+  },
+  facetaBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.accent,
+  },
+  motivoContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(245, 230, 211, 0.08)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.accent,
+  },
+  motivoIcon: {
+    fontSize: 14,
+    marginRight: 8,
+    marginTop: 1,
+  },
+  motivoText: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.cream,
+    opacity: 0.9,
+    lineHeight: 20,
   },
 });

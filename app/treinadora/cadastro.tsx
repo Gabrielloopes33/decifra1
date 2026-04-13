@@ -62,7 +62,6 @@ import { useState } from 'react';
               auth_user_id: data.user.id,
               email: email,
               nome: nome,
-              creditos: 5,
             });
 
           if (dbError) {
@@ -74,7 +73,7 @@ import { useState } from 'react';
           } else {
             Alert.alert(
               'Conta criada com sucesso!',
-              'Você ganhou 5 créditos de boas-vindas. Faça login para começar.',
+              'Agora você tem acesso ao sistema. Faça login para começar.',
               [{ text: 'OK', onPress: () => router.replace('/treinadora/login') }]
             );
           }
@@ -100,7 +99,7 @@ import { useState } from 'react';
               <View style={styles.content}>
                 <Text style={styles.title}>Cadastro Treinadora</Text>
                 <Text style={styles.subtitle}>
-                  Crie sua conta e ganhe 5 créditos grátis
+                  Crie sua conta para começar
                 </Text>
 
                 <View style={styles.form}>

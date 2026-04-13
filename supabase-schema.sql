@@ -418,3 +418,25 @@ CREATE POLICY "Admins podem ver todos os protocolos recomendados"
   USING (is_admin());
 
 COMMENT ON FUNCTION is_admin() IS 'Verifica se o usuário autenticado é administrador';
+
+-- ================================================
+-- CAMPO DISTRIBUIDO NA TABELA CODIGOS
+-- ================================================
+
+-- 1. Adicionar coluna distribuido para rastrear quando a treinadora resgatou/visualizou o código
+ALTER TABLE codigos ADD COLUMN IF NOT EXISTS distribuido BOOLEAN NOT NULL DEFAULT FALSE;
+
+-- 2. Adicionar índice para performance em consultas filtradas por distribuido
+CREATE INDEX IF NOT EXISTS idx_codigos_distribuido ON codigos(distribuido);
+
+-- 3. Política RLS para permitir que treinadoras atualizem o campo distribuido
+CREATE POLICY "Treinadoras podem atualizar codigos distribuidos"
+  ON codigos FOR UPDATE
+  USING (
+    treinadora_id IN (
+      SELECT id FROM treinadoras WHERE auth_user_id = auth.uid()
+    )
+  );
+
+-- 4. Adicionar comentário explicativo na coluna
+COMMENT ON COLUMN codigos.distribuido IS 'Indica se a treinadora já resgatou/visualizou este código para distribuir a um cliente';

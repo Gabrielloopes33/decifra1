@@ -107,6 +107,49 @@
     4: { nome: 'Equilíbrio', questoes: Array.from({length: 30}, (_, i) => i + 91) },
   };
 
-  export type FatorKey = keyof typeof FATORES;
-  export type FacetaKey = keyof typeof FACETAS;
+// Descrições das facetas para exibição detalhada
+export const FACETAS_DESCRICAO: Record<keyof typeof FACETAS, string> = {
+  // Neuroticismo
+  N1: 'Tendência a sentir tensão, preocupação e nervosismo. Pessoas com score alto experimentam ansiedade frequente.',
+  N2: 'Tendência a sentir raiva, frustração e hostilidade quando as coisas não vão como desejado.',
+  N3: 'Tendência a sentir tristeza, desesperança e desinteresse pelas atividades da vida.',
+  N4: 'Consciência de como outros a percebem; sensibilidade a situações sociais desconfortáveis.',
+  N5: 'Tendência a agir por impulso sem considerar as consequências; dificuldade em resistir às tentações.',
+  N6: 'Capacidade de lidar com estresse e situações difíceis; sensibilidade a pressões externas.',
+  
+  // Extroversão
+  E1: 'Afeição genuína e calorosa pelos outros; tendência a expressar afeto de forma sincera.',
+  E2: 'Gosto pela companhia de outras pessoas; busca ativa por interação social e grupos.',
+  E3: 'Disposição para falar, liderar e expressar opiniões; capacidade de impor-se socialmente.',
+  E4: 'Nível de energia e ritmo de vida; preferência por um estilo de vida acelerado e dinâmico.',
+  E5: 'Busca por experiências emocionantes, variedade e aventura; abertura a novidades.',
+  E6: 'Tendência a experimentar emoções positivas como alegria, entusiasmo e otimismo.',
+  
+  // Abertura
+  O1: 'Imaginação vívida e criativa; tendência a sonhar acordado e criar mundos mentais.',
+  O2: 'Apreciação pela arte, beleza e estética; sensibilidade a experiências sensoriais refinadas.',
+  O3: 'Reconhecimento dos próprios sentimentos e emoções; capacidade de compreender estados internos.',
+  O4: 'Abertura a novas experiências e atividades; disposição para tentar coisas diferentes.',
+  O5: 'Curiosidade intelectual e interesse por ideias complexas; gosto por discussões filosóficas.',
+  O6: 'Disposição a reconsiderar valores sociais, políticos e religiosos; tolerância a diferentes visões.',
+  
+  // Amabilidade
+  A1: 'Presunção de que os outros são bem-intencionados; tendência a confiar nas pessoas.',
+  A2: 'Franqueza e sinceridade nas interações; disposição para ser direto sem ser rude.',
+  A3: 'Preocupação com o bem-estar dos outros; disposição para ajudar sem esperar retorno.',
+  A4: 'Tendência a cooperar e evitar conflitos; capacidade de ceder e ser flexível.',
+  A5: 'Modéstia e humildade; disposição para subestimar conquistas e não buscar destaque.',
+  A6: 'Sensibilidade às emoções dos outros; capacidade de simpatizar e compadecer-se.',
+  
+  // Conscienciosidade
+  C1: 'Confiança nas próprias habilidades; sensação de competência e eficácia pessoal.',
+  C2: 'Organização e ordem pessoal; preferência por ambientes estruturados e planejados.',
+  C3: 'Senso de obrigação e dever; compromisso com responsabilidades e promessas.',
+  C4: 'Aspiração por excelência e realização; disposição para trabalhar duro para atingir metas.',
+  C5: 'Capacidade de persistir em tarefas difíceis; autocontrole e resistência à procrastinação.',
+  C6: 'Reflexão cuidadosa antes de agir; tendência a pensar nas consequências das ações.',
+};
+
+export type FatorKey = keyof typeof FATORES;
+export type FacetaKey = keyof typeof FACETAS;
   

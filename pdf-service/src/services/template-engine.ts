@@ -141,7 +141,7 @@ export class TemplateEngine {
       return {
         nome: nomes[sigla],
         sigla,
-        score,
+        score: Math.round(score),
         percentil,
         classificacao,
         cor: cores[sigla]

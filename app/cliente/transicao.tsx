@@ -166,16 +166,16 @@ export default function TransicaoScreen() {
 
         {/* Informação da estação */}
         <View style={styles.stationInfo}>
-          <Text style={styles.estacaoLabel}>
+          <Text style={[styles.estacaoLabel, { color: temaEstacao.textSecondary }]}>
             Estação {estacaoNum} de 4
           </Text>
-          <Text style={styles.estacaoNome}>{temaEstacao.name}</Text>
-          <Text style={styles.estacaoSubtitulo}>{temaEstacao.subtitle}</Text>
+          <Text style={[styles.estacaoNome, { color: temaEstacao.textPrimary }]}>{temaEstacao.name}</Text>
+          <Text style={[styles.estacaoSubtitulo, { color: temaEstacao.textSecondary }]}>{temaEstacao.subtitle}</Text>
         </View>
 
         {/* Mensagem de transição */}
         <View style={styles.mensagemContainer}>
-          <Text style={styles.mensagem}>{mensagem}</Text>
+          <Text style={[styles.mensagem, { color: temaEstacao.textPrimary }]}>{mensagem}</Text>
         </View>
 
         {/* Barra de progresso visual */}
@@ -195,7 +195,7 @@ export default function TransicaoScreen() {
         </View>
 
         {/* Texto de espera */}
-        <Text style={styles.textoEspera}>
+        <Text style={[styles.textoEspera, { color: temaEstacao.textSecondary }]}>
           Preparando sua experiência...
         </Text>
       </Animated.View>
@@ -215,68 +215,66 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   elementIcon: {
-    width: 120,
-    height: 120,
+    width: 140,
+    height: 140,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 36,
   },
   iconText: {
-    fontSize: 80,
-    textShadowColor: 'rgba(0,0,0,0.3)',
+    fontSize: 96,
+    textShadowColor: 'rgba(0,0,0,0.25)',
     textShadowOffset: { width: 0, height: 4 },
-    textShadowRadius: 10,
+    textShadowRadius: 12,
   },
   stationInfo: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 36,
   },
   estacaoLabel: {
-    fontSize: 14,
-    color: COLORS.cream,
-    opacity: 0.8,
+    fontSize: 15,
+    opacity: 0.9,
     letterSpacing: 2,
     textTransform: 'uppercase',
-    marginBottom: 8,
+    marginBottom: 10,
+    fontWeight: '600',
   },
   estacaoNome: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: COLORS.creamLight,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   estacaoSubtitulo: {
-    fontSize: 16,
-    color: COLORS.cream,
-    opacity: 0.9,
+    fontSize: 18,
+    opacity: 0.95,
     textAlign: 'center',
   },
   mensagemContainer: {
-    backgroundColor: 'rgba(45, 21, 24, 0.5)',
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 40,
+    backgroundColor: 'rgba(45, 21, 24, 0.45)',
+    borderRadius: 18,
+    padding: 28,
+    marginBottom: 44,
     borderWidth: 1,
-    borderColor: 'rgba(245, 240, 230, 0.1)',
+    borderColor: 'rgba(245, 240, 230, 0.12)',
   },
   mensagem: {
-    fontSize: 16,
-    color: COLORS.cream,
+    fontSize: 18,
     textAlign: 'center',
-    lineHeight: 26,
+    lineHeight: 28,
     fontStyle: 'italic',
+    fontWeight: '500',
   },
   progressoVisual: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 32,
+    gap: 14,
+    marginBottom: 36,
   },
   progressoDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: 'rgba(245, 240, 230, 0.2)',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: 'rgba(245, 240, 230, 0.25)',
   },
   progressoDotAtivo: {
     shadowColor: '#000',
@@ -286,9 +284,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   textoEspera: {
-    fontSize: 14,
-    color: COLORS.cream,
-    opacity: 0.6,
+    fontSize: 15,
+    opacity: 0.8,
     letterSpacing: 1,
+    fontWeight: '500',
   },
 });

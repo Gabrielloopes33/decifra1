@@ -94,15 +94,61 @@ export default function ClienteCodigoScreen() {
       if (codigoError || !codigoData) {
         shake();
         setInputState('invalid');
-        Alert.alert('Código inválido', 'O código informado não existe ou já foi utilizado.');
+        Alert.alert('Código inválido', 'O código informado não existe.');
         setLoading(false);
         return;
       }
 
       if (codigoData.usado) {
-        shake();
-        setInputState('invalid');
-        Alert.alert('Código já utilizado', 'Este código já foi usado por outro cliente.');
+        // Código já utilizado - verificar se tem resultado para redirecionar
+        if (!codigoData.cliente_id) {
+          shake();
+          setInputState('invalid');
+          Alert.alert('Código já utilizado', 'Este código já foi usado, mas não foi possível encontrar os dados do cliente.');
+          setLoading(false);
+          return;
+        }
+
+        // Buscar resultado do cliente
+        const { data: resultadoData, error: resultadoError } = await supabase
+          .from('resultados')
+          .select('id')
+          .eq('cliente_id', codigoData.cliente_id)
+          .single();
+
+        if (resultadoError || !resultadoData) {
+          // Código usado mas sem resultado (teste em andamento)
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          Alert.alert(
+            'Teste em andamento',
+            'Este código já foi utilizado, mas o teste ainda não foi concluído. Entre em contato com sua treinadora para mais informações.'
+          );
+          setLoading(false);
+          return;
+        }
+
+        // Código usado com resultado disponível - redirecionar para resultado
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        setInputState('valid');
+        
+        Alert.alert(
+          'Código já utilizado',
+          'Redirecionando para seu resultado...',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                router.push({
+                  pathname: '/cliente/resultado',
+                  params: {
+                    clienteId: codigoData.cliente_id,
+                    resultadoId: resultadoData.id,
+                  },
+                });
+              },
+            },
+          ]
+        );
         setLoading(false);
         return;
       }
@@ -244,7 +290,10 @@ export default function ClienteCodigoScreen() {
               <Text style={styles.infoTitle}>ℹ️ Sobre o código</Text>
               <Text style={styles.infoText}>
                 O código é válido por 30 dias após a geração.{'\n'}
-                Cada código pode ser usado apenas uma vez.
+                Cada código pode ser usado apenas uma vez.{'\n'}
+                <Text style={{ fontWeight: '600', color: COLORS.accent }}>
+                  Você pode usar o mesmo código para acessar seu resultado a qualquer momento.
+                </Text>
               </Text>
             </View>
           </View>
@@ -270,39 +319,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   title: {
-    fontSize: 36,
+    fontSize: 38,
     fontWeight: 'bold',
     color: COLORS.creamLight,
-    marginBottom: 12,
+    marginBottom: 14,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: COLORS.cream,
-    opacity: 0.9,
-    marginBottom: 40,
+    opacity: 0.95,
+    marginBottom: 44,
     textAlign: 'center',
-    lineHeight: 24,
+    lineHeight: 26,
   },
   form: {
     width: '100%',
   },
   label: {
-    fontSize: 16,
+    fontSize: 17,
     color: COLORS.cream,
-    marginBottom: 12,
+    marginBottom: 14,
     fontWeight: '600',
   },
   inputContainer: {
     position: 'relative',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   input: {
     borderWidth: 2,
-    paddingVertical: 18,
+    paddingVertical: 20,
     paddingHorizontal: 20,
-    borderRadius: 12,
-    fontSize: 24,
+    borderRadius: 14,
+    fontSize: 26,
     fontWeight: 'bold',
     color: COLORS.creamLight,
     textAlign: 'center',
@@ -312,8 +361,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 20,
     top: '50%',
-    marginTop: -12,
-    fontSize: 20,
+    marginTop: -14,
+    fontSize: 22,
     color: COLORS.success,
     fontWeight: 'bold',
   },
@@ -321,13 +370,13 @@ const styles = StyleSheet.create({
     color: COLORS.error,
   },
   hint: {
-    fontSize: 12,
+    fontSize: 13,
     color: COLORS.textMuted,
-    marginBottom: 24,
+    marginBottom: 28,
     textAlign: 'center',
   },
   button: {
-    borderRadius: 12,
+    borderRadius: 14,
     overflow: 'hidden',
     shadowColor: COLORS.accent,
     shadowOffset: { width: 0, height: 4 },
@@ -336,45 +385,45 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonGradient: {
-    paddingVertical: 18,
+    paddingVertical: 20,
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 14,
   },
   buttonDisabled: {
     opacity: 0.5,
   },
   buttonText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     color: COLORS.creamLight,
   },
   backButton: {
-    marginTop: 24,
+    marginTop: 28,
     alignItems: 'center',
   },
   backText: {
     color: COLORS.cream,
-    fontSize: 16,
-    opacity: 0.8,
+    fontSize: 17,
+    opacity: 0.85,
   },
   infoBox: {
-    marginTop: 40,
-    padding: 20,
+    marginTop: 44,
+    padding: 22,
     backgroundColor: COLORS.cardBg,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: COLORS.cardBorder,
   },
   infoTitle: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: COLORS.cream,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   infoText: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textSecondary,
-    lineHeight: 20,
+    lineHeight: 22,
     textAlign: 'center',
   },
 });

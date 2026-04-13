@@ -200,17 +200,17 @@ export default function ClienteTesteScreen() {
                 {temaEstacao.icon === 'water' && '💧'}
                 {temaEstacao.icon === 'flame' && '🔥'}
               </Text>
-              <Text style={styles.stationLabel}>
+              <Text style={[styles.stationLabel, { color: temaEstacao.textSecondary }]}>
                 Estação {estacaoAtual} de 4
               </Text>
             </View>
-            <Text style={styles.progressoText}>
+            <Text style={[styles.progressoText, { color: temaEstacao.textSecondary }]}>
               {respondidas}/{total}
             </Text>
           </View>
           
-          <Text style={styles.nomeEstacao}>{temaEstacao.name}</Text>
-          <Text style={styles.descricaoEstacao}>{temaEstacao.description}</Text>
+          <Text style={[styles.nomeEstacao, { color: temaEstacao.textPrimary }]}>{temaEstacao.name}</Text>
+          <Text style={[styles.descricaoEstacao, { color: temaEstacao.textSecondary }]}>{temaEstacao.description}</Text>
 
           {/* Barra de progresso animada */}
           <View style={styles.progressBarContainer}>
@@ -249,7 +249,7 @@ export default function ClienteTesteScreen() {
                   </Text>
                   {respostaSelecionada && (
                     <View style={[styles.respondidoBadge, { backgroundColor: temaEstacao.color }]}>
-                      <Text style={styles.respondidoText}>✓</Text>
+                      <Text style={[styles.respondidoText, { color: temaEstacao.textPrimary }]}>✓</Text>
                     </View>
                   )}
                 </View>
@@ -264,6 +264,7 @@ export default function ClienteTesteScreen() {
                       label={label}
                       isSelected={respostaSelecionada === valor}
                       themeColor={temaEstacao.color}
+                      selectedTextColor={temaEstacao.textPrimary}
                       onPress={() => salvarRespostaLocal(questaoId, valor)}
                     />
                   ))}
@@ -314,47 +315,43 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 20,
+    paddingTop: 20,
+    paddingBottom: 24,
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   stationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   stationIcon: {
-    fontSize: 20,
+    fontSize: 24,
   },
   stationLabel: {
-    fontSize: 14,
-    color: COLORS.cream,
+    fontSize: 15,
     fontWeight: '600',
-    opacity: 0.9,
+    opacity: 0.95,
   },
   progressoText: {
-    fontSize: 14,
-    color: COLORS.cream,
+    fontSize: 15,
     fontWeight: '600',
-    opacity: 0.9,
+    opacity: 0.95,
   },
   nomeEstacao: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.creamLight,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   descricaoEstacao: {
-    fontSize: 14,
-    color: COLORS.cream,
-    opacity: 0.8,
-    marginBottom: 16,
-    lineHeight: 20,
+    fontSize: 16,
+    opacity: 0.95,
+    marginBottom: 18,
+    lineHeight: 22,
   },
   progressBarContainer: {
     flexDirection: 'row',
@@ -363,20 +360,19 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     flex: 1,
-    height: 6,
-    backgroundColor: 'rgba(245, 240, 230, 0.2)',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: 'rgba(245, 240, 230, 0.25)',
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
   progressPercentual: {
-    fontSize: 14,
-    color: COLORS.cream,
+    fontSize: 15,
     fontWeight: '600',
-    minWidth: 40,
+    minWidth: 44,
     textAlign: 'right',
   },
   content: {
@@ -384,42 +380,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   questaoCard: {
-    backgroundColor: 'rgba(45, 21, 24, 0.6)',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: 'rgba(45, 21, 24, 0.75)',
+    borderRadius: 18,
+    padding: 22,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(245, 240, 230, 0.1)',
+    borderColor: 'rgba(245, 240, 230, 0.15)',
   },
   questaoHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   questaoNumero: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
   respondidoBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
   respondidoText: {
-    color: COLORS.creamLight,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: 'bold',
   },
   questaoTexto: {
-    fontSize: 16,
-    color: COLORS.cream,
-    marginBottom: 20,
-    lineHeight: 24,
+    fontSize: 18,
+    color: COLORS.creamLight,
+    marginBottom: 24,
+    lineHeight: 27,
+    fontWeight: '500',
   },
   escalaContainer: {
     flexDirection: 'row',
@@ -427,11 +423,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   botaoFinalizar: {
-    paddingVertical: 18,
-    borderRadius: 12,
+    paddingVertical: 20,
+    borderRadius: 14,
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 16,
+    marginTop: 28,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -439,11 +435,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   botaoFinalizarTexto: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: COLORS.creamLight,
   },
   espacoFinal: {
-    height: 40,
+    height: 48,
   },
 });
